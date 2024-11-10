@@ -1,0 +1,6 @@
+sessions
+data.txt
+.env
+venv
+**/__pycache__/
+user_agents.json
