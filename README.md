@@ -1,4 +1,4 @@
-# 🎨AUTO FARM FOR NotPixel 🎨
+# 🎨 AUTO FARM FOR NotPixel 🎨
 
 > [!WARNING]
 > I am not responsible for your account. Please consider the potential risks before using this bot.
@@ -24,26 +24,24 @@
 
 ## [Settings](https://github.com/Enukio/Notpixel/blob/main/.env-example)
 |                     Settings                      |                                                         Description                                                          |
-|:-------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------------------:|
-|               **API_ID / API_HASH**               |                           Platform data from which to run the Telegram session (default - android)                           |
-|            **USE_RANDOM_DELAY_IN_RUN**            |                                                      Name saying itself                                                      |
-|              **RANDOM_DELAY_IN_RUN**              |                                      Random seconds delay for ^^^ (default is [5, 30])                                       |
-|             **SLEEP_TIME_IN_MINUTES**             |                                 Random minutes delay between cycles (default is [120, 180])                                  |
-|                    **USE_REF**                    |                                 Register accounts with ur referral or not (default - False)                                  |
-|                    **REF_ID**                     |                           Your referral argument (comes after app/startapp? in your referral link)                           |
-| **PERCENT_OF_REFERRALS_FOR_CREATORS_OF_THE_SOFT** |                                 Give some referrals for creators of the soft (default - 15)                                  |
-|              **USE_PROXY_FROM_FILE**              |                         Whether to use a proxy from the `bot/config/proxies.txt` file (True / False)                         |
-|               **ENABLE_AUTO_TASKS**               |                                               Enable auto tasks (True / False)                                               |
-|               **ENABLE_AUTO_DRAW**                |                                              Enable auto drawing (True / False)                                              |
-|        **UNSAFE_ENABLE_JOIN_TG_CHANNELS**         |                                [!!UNSAFE!!] Enable auto joining to tg channels (True / False)                                |
-|              **ENABLE_CLAIM_REWARD**              |                                         Enable auto claim of rewards (True / False)                                          |
-|              **ENABLE_AUTO_UPGRADE**              |                                             Enable auto upgrading (True / False)                                             |
-|                  **ENABLE_SSL**                   | Enable verification of ssl certificates (sometimes it can help with SSL: CERTIFICATE_VERIFY_FAILED error)  (default - False) |
-|       **ENABLE_AUTO_JOIN_TO_SQUAD_CHANNEL**       |                                 Enable auto join to squad telegram channel (default - False)                                 |
-|           **ENABLE_AUTO_JOIN_TO_SQUAD**           |                                          Enable auto join to squad (default - True)                                          |
-|                  **SQUAD_SLUG**                   |                               Squad slug [telegram channel slug] (default - Lootersera_th)                                |
-|               **DISABLE_IN_NIGHT**                |                                          Disable script in night (default - False)                                           |
-|                  **NIGHT_TIME**                   |                                          Night time [from, to] (default - [23, 6])                                           |
+|----------------------------|:-------------------------------------------------------------------------------------------------------------:|
+| **API_ID / API_HASH**      | Platform data from which to run the Telegram session (default - android)                                      |       
+| **REF_LINK**               | Put your ref link here (default: my ref link)                                                                 |
+| **AUTO_TASK**              |  Auto do tasks (default: True)                                                                                  |
+| **AUTO_UPGRADE_PAINT_REWARD** | AUTO upgrade paint reward if possible (default: True)                                                                      |
+| **AUTO_UPGRADE_RECHARGE_SPEED** | AUTO upgrade recharge speed if possible (default: True)                                                                      |
+| **AUTO_UPGRADE_RECHARGE_ENERGY** | AUTO upgrade energy limit if possible (default: True)                                                                      |
+| **USE_CUSTOM_TEMPLATE** | Use custom template if it's disabled global template will be used (default: True)                                                    |
+| **CUSTOM_TEMPLATE_ID** | your custom template id (default: my template id)                                                                      |
+| **USE_RANDOM_TEMPLATES** | Option to use random templates on catalog (default: False)                                                                      |
+| **RANDOM_TEMPLATES_ID** |List of templates id (default: list of templates on catalog )                                                                      |
+| **NIGHT_MODE** | Sleep time for the bot (default: True)                                                                      |
+| **SLEEP_TIME** | Sleep in your timezone for the bot (default: [0, 7] 0am to 7am)                                                                     |
+| **DELAY_EACH_ACCOUNT** | Sleep time in second between each account(non multi thread) (default: [10, 15])                                                                     |
+| **SLEEP_BETWEEN_EACH_ROUND** | Sleep time in second between each round (default: [1000, 1500])                                                                     |
+| **ADVANCED_ANTI_DETECTION** | More protection for your account ;-; (default: False)                                                                     |
+| **USE_PROXY_FROM_FILE**    | Whether to use a proxy from the bot/config/proxies.txt file (True / False)                                    |
+| **BOT_TOKEN**    | Get Bot Token from [@BotFather](https://t.me/BotFather) (default: )                      
 
 ## Quick Start 📚
 
