@@ -19,4 +19,3 @@ def fetch_version(ua):
         return major_version
     else:
         return
-
