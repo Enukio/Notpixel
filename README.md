@@ -139,3 +139,25 @@ You can also use arguments for quick start, for example:
 # 2 - Creates a session 👨‍🎨
 ```
 
+# Termux manual installation
+```
+> pkg update && pkg upgrade -y
+> pkg install python rust git -y
+> git clone https://github.com/vanhbakaa/Notpixel-bot.git
+> cd Notpixel-bot
+> cp .env-example .env
+> nano .env
+# edit your api_id and api_hash
+> pip install -r requirements.txt
+> python main.py
+```
+
+You can also use arguments for quick start, for example:
+```termux
+~/Notpixel-bot > python main.py --action (1/2)
+# Or
+~/Notpixel-bot > python main.py -a (1/2)
+
+# 1 - Run clicker
+# 2 - Creates a session 
+```
