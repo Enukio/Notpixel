@@ -645,7 +645,7 @@ class Tapper:
                     if settings.ADVANCED_ANTI_DETECTION:
                         self.can_run = False
                         logger.warning(
-                            "<yellow>Detected index js file change. Using git pull to download changes </yellow>")
+                            "<yellow>Detected index js file change. </yellow>")
                     else:
                         self.can_run = False
                         logger.warning(
