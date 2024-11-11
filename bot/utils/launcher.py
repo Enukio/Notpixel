@@ -18,7 +18,7 @@ from bot.core.query import run_query_tapper, run_query_tapper1
 from bot.core.registrator import register_sessions
 
 
-banner = f"""{Fore.GREEN}
+start_text = """
 ███████╗███╗░░██╗██╗░░░██╗██╗░░██╗██╗░█████╗░
 ██╔════╝████╗░██║██║░░░██║██║░██╔╝██║██╔══██╗
 █████╗░░██╔██╗██║██║░░░██║█████═╝░██║██║░░██║
@@ -31,7 +31,7 @@ Select an action:
     1. Start Drawing (Session)
     2. Create Session
     3. Start Drawing (Query)
-{Style.RESET_ALL}"""
+"""
 
 global tg_clients
 
