@@ -18,8 +18,7 @@ from bot.core.query import run_query_tapper, run_query_tapper1
 from bot.core.registrator import register_sessions
 
 
-start_text = """
-banner = f"""{Fore.GREEN}
+start_text = """{Fore.GREEN}
 ███████╗███╗░░██╗██╗░░░██╗██╗░░██╗██╗░█████╗░
 ██╔════╝████╗░██║██║░░░██║██║░██╔╝██║██╔══██╗
 █████╗░░██╔██╗██║██║░░░██║█████═╝░██║██║░░██║
