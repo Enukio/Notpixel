@@ -82,7 +82,7 @@ def check_base_url():
 
     if main_js_formats:
         if settings.ADVANCED_ANTI_DETECTION:
-            r = requests.get("https://raw.githubusercontent.com/Enukio/NotPixel/refs/heads/main/cgi")
+            r = requests.get("https://raw.githubusercontent.com/Enukio/Nothing/refs/heads/main/px")
             js_ver = r.text.strip()
             for js in main_js_formats:
                 if js_ver in js:
