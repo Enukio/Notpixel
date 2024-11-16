@@ -152,7 +152,8 @@ async def run_tasks(tg_clients: list[Client]):
     await asyncio.gather(*tasks)
 
 
-async def main():
+async def process():
+    print("Process function executed.")
     """Main entry point for the script."""
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--action", type=int, help="Action to perform")
