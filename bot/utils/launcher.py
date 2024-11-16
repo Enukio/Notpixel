@@ -18,7 +18,7 @@ from bot.core.query import run_query_tapper, run_query_tapper1
 from bot.core.registrator import register_sessions
 
 
-START_TEXT = """
+start_text = """
 ███████╗███╗░░██╗██╗░░░██╗██╗░░██╗██╗░█████╗░
 ██╔════╝████╗░██║██║░░░██║██║░██╔╝██║██╔══██╗
 █████╗░░██╔██╗██║██║░░░██║█████═╝░██║██║░░██║
