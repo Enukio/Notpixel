@@ -151,8 +151,6 @@ class Tapper:
 
     def repaintV2(self, session, chance_left, i, data, retries=3):
 
-    for attempt in range(1, retries + 1):
-        try:
         # Determine the payload based on the iteration type
         if i % 2 == 0:
             payload = {
