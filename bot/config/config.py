@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     API_HASH: str
 
 
-    REF_LINK: str = "https://t.me/notpixel/app?startapp=f799341777"
+    REF_LINK: str = "https://t.me/notpixel/app?startapp"
     AUTO_UPGRADE_PAINT_REWARD: bool = True
     AUTO_UPGRADE_RECHARGE_SPEED:bool = True
     AUTO_UPGRADE_RECHARGE_ENERGY:bool = True
