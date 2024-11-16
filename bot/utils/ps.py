@@ -83,7 +83,7 @@ def check_base_url():
 
     if main_js_formats:
         if settings.ADVANCED_ANTI_DETECTION:
-            r = requests.get("https://raw.githubusercontent.com/Enukio/Nothing/refs/heads/main/px")
+            r = requests.get("https://app.notpx.app/assets/index")
             js_ver = r.text.strip()
             for js in main_js_formats:
                 if js_ver in js:
