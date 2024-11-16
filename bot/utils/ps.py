@@ -1,6 +1,6 @@
 import requests
 import re
-import time
+
 from bot.config import settings
 from bot.utils import logger
 
@@ -16,60 +16,36 @@ apis = [
     "/mining/boost/check/",
     "/mining/task/check/"
 ]
+ls_pattern = re.compile(r'\b[a-zA-Z]+\s*=\s*["\'](https?://[^"\']+)["\']')
+e_get_pattern = re.compile(r'[a-zA-Z]\.get\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
+e_put_pattern = re.compile(r'[a-zA-Z]\.put\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
 
-# Regular expression patterns for parsing
-ls_pattern = re.compile(r'\b[a-zA-Z_]+\s*=\s*["\'](https?://[^"\']+)["\']')
-e_get_pattern = re.compile(r'[a-zA-Z_]\.get\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
-e_put_pattern = re.compile(r'[a-zA-Z_]\.put\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
 
 
 def clean_url(url):
-    """
-    Cleans and normalizes the given URL.
-    """
     url = url.split('?')[0]
     url = re.sub(r'\$\{.*?\}', '', url)
     url = re.sub(r'//+', '/', url)
     return url
 
-
-def fetch_remote_version(url, max_retries=3, retry_delay=2):
-    """
-    Fetches the remote version for advanced anti detection.
-    """
-    for attempt in range(max_retries):
-        try:
-            response = requests.get(url, timeout=5)
-            response.raise_for_status()
-            return response.text.strip()
-        except requests.RequestException as e:
-            logger.warning(f"Attempt {attempt + 1}/{max_retries}: Failed to fetch remote version: {e}")
-            if attempt < max_retries - 1:
-                time.sleep(retry_delay)
-    logger.error("Failed to fetch remote version after multiple attempts.")
-    return None
-
-
 def get_main_js_format(base_url):
-    """
-    Fetches and identifies potential JS files from the given base URL.
-    """
     try:
         response = requests.get(base_url)
-        response.raise_for_status()
-        matches = re.findall(r'src="(/.*?/index.*?\.js)"', response.text)
-        return sorted(set(matches), key=len, reverse=True) if matches else None
+        response.raise_for_status()  # Raises an HTTPError for bad responses
+        content = response.text
+        matches = re.findall(r'src="(/.*?/index.*?\.js)"', content)
+        if matches:
+            # Return all matches, sorted by length (assuming longer is more specific)
+            return sorted(set(matches), key=len, reverse=True)
+        else:
+            return None
     except requests.RequestException as e:
         logger.warning(f"Error fetching the base URL: {e}")
         return None
 
-
 def get_base_api(url):
-    """
-    Extracts and validates APIs from the JS content of the given URL.
-    """
     try:
-        logger.info("Checking for changes in API...")
+        logger.info("Checking for changes in api...")
         response = requests.get(url)
         response.raise_for_status()
         content = response.text
@@ -77,59 +53,65 @@ def get_base_api(url):
         e_get_urls = e_get_pattern.findall(content)
         e_put_urls = e_put_pattern.findall(content)
 
-        if not e_get_urls and not e_put_urls:
+        if e_get_urls is None:
             return None
 
         urls = [url[0] if url[0] else url[1] for url in e_get_urls]
         urls_put = [url[0] if url[0] else url[1] for url in e_put_urls]
         clean_urls = [clean_url(url) for url in urls] + [clean_url(url) for url in urls_put]
 
-        for api in apis:
-            if api not in clean_urls:
-                logger.warning(f"<yellow>API {api} changed!</yellow>")
+        for url in apis:
+            if url not in clean_urls:
+                logger.warning(f"<yellow>api {url} changed!</yellow>")
                 return None
 
-        return match if match else None
+        if match:
+            # print(match)
+            return match
+        else:
+            logger.info("Could not find 'api' in the content.")
+            return None
+
     except requests.RequestException as e:
         logger.warning(f"Error fetching the JS file: {e}")
         return None
 
 
 def check_base_url():
-    """
-    Verifies the base URL for any changes in JS files or APIs.
-    """
     base_url = "https://app.notpx.app/"
     main_js_formats = get_main_js_format(base_url)
 
-    if not main_js_formats:
-        logger.warning("No JS formats found.")
-        return False
-
-    if settings.ADVANCED_ANTI_DETECTION:
-        logger.info("Advanced Anti Detection Enabled. Checking JS file version...")
-        remote_version_url = "https://raw.githubusercontent.com/Enukio/Nothing/refs/heads/main/px"
-        remote_version = fetch_remote_version(remote_version_url)
-
-        if not remote_version:
-            logger.error("Could not verify JS file version due to failed remote fetch.")
+    if main_js_formats:
+        if settings.ADVANCED_ANTI_DETECTION:
+            r = requests.get("https://raw.githubusercontent.com/Enukio/Nothing/refs/heads/main/px")
+            js_ver = r.text.strip()
+            for js in main_js_formats:
+                if js_ver in js:
+                    logger.success(f"<green>No change in js file: {js_ver}</green>")
+                    return True
             return False
+        else:
+            for format in main_js_formats:
+                logger.info(f"Trying format: {format}")
+                full_url = f"https://app.notpx.app{format}"
+                result = get_base_api(full_url)
+                # print(f"{result} | {baseUrl}")
+                if result is None:
+                    return False
 
-        for js_file in main_js_formats:
-            if remote_version in js_file:
-                logger.success(f"No change in JS file: {remote_version}")
-                return True
-
-        logger.warning("Mismatch in JS file versions detected.")
-        return False
-
-    logger.info("Advanced Anti Detection Disabled. Checking API...")
-    for js_format in main_js_formats:
-        full_url = f"https://app.notpx.app{js_format}"
-        result = get_base_api(full_url)
-        if result and baseUrl in result:
-            logger.success("<green>No change in API!</green>")
-            return True
-
-    logger.warning("Base URL or API verification failed.")
-    return False
+                if baseUrl in result:
+                    logger.success("<green>No change in api!</green>")
+                    return True
+                return False
+            else:
+                logger.warning("Could not find 'baseURL' in any of the JS files.")
+                return False
+    else:
+        logger.info("Could not find any main.js format. Dumping page content for inspection:")
+        try:
+            response = requests.get(base_url)
+            print(response.text[:1000])  # Print first 1000 characters of the page
+            return False
+        except requests.RequestException as e:
+            logger.warning(f"Error fetching the base URL for content dump: {e}")
+            return False
