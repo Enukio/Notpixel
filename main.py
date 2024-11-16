@@ -1,11 +1,11 @@
 import asyncio
 from contextlib import suppress
 
-from bot.utils.launcher import process
+from bot.utils.launcher import main
 
 
 async def main():
-    await process()
+    await main()
 
 
 if __name__ == '__main__':
