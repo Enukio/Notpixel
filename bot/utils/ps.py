@@ -107,7 +107,7 @@ def check_base_url():
         return False
 
     if settings.ADVANCED_ANTI_DETECTION:
-        logger.info("<purple>Advanced Anti Detection Enabled. Checking JS file version...</purple>")
+        logger.info("Advanced Anti Detection Enabled. Checking JS file version...")
         remote_version_url = "https://raw.githubusercontent.com/Enukio/Nothing/refs/heads/main/px"
         remote_version = fetch_remote_version(remote_version_url)
 
@@ -123,7 +123,7 @@ def check_base_url():
         logger.warning("Mismatch in JS file versions detected.")
         return False
 
-    logger.info("<purple>Advanced Anti Detection Disabled. Checking API...</purple>")
+    logger.info("Advanced Anti Detection Disabled. Checking API...")
     for js_format in main_js_formats:
         full_url = f"https://app.notpx.app{js_format}"
         result = get_base_api(full_url)
