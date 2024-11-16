@@ -12,4 +12,5 @@ logger.add(
 
 logger = logger.opt(colors=True)
 
+if __name__ == "__main__":
 logger.error(f"Failed to configure logger: {e}")
