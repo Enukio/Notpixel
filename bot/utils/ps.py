@@ -100,21 +100,39 @@ def check_base_url(output_dir="./"):
     main_js_formats = get_main_js_format(base_url, output_dir)
 
     if main_js_formats:
-        for format in main_js_formats:
-            full_url = f"https://app.notpx.app{format}"
-            js_ver = os.path.basename(format)  # Extract the JS file name/version
-            result = get_base_api(full_url)
+        if settings.ADVANCED_ANTI_DETECTION:
+            # Fetch the expected JS version
+            try:
+                r = requests.get("https://raw.githubusercontent.com/Enukio/Nothing/refs/heads/main/px")
+                r.raise_for_status()
+                js_ver = r.text.strip()
+            except requests.RequestException as e:
+                logger.warning(f"Error fetching the expected JS version: {e}")
+                return False
 
-            if result is None:
-                logger.warning(f"No change in API detected for {full_url}")
-                continue
+            # Check if the version exists in the fetched files
+            for js in main_js_formats:
+                if js_ver in js:
+                    logger.success(f"<green>No change in js file: {js_ver}</green>")
+                    return True
+            logger.warning(f"<yellow>Expected JS version {js_ver} not found!</yellow>")
+            return False
+        else:
+            for format in main_js_formats:
+                full_url = f"https://app.notpx.app{format}"
+                js_ver = os.path.basename(format)  # Extract the JS file name/version
+                result = get_base_api(full_url)
 
-            if baseUrl in result:
-                logger.success(f"<green>No change in js file: {js_ver}</green>")
-                return True
+                if result is None:
+                    logger.warning(f"No change in API detected for {full_url}")
+                    continue
 
-        logger.warning("Could not find 'baseURL' in any of the JS files.")
-        return False
+                if baseUrl in result:
+                    logger.success(f"<green>No change in js file: {js_ver}</green>")
+                    return True
+
+            logger.warning("Could not find 'baseURL' in any of the JS files.")
+            return False
     else:
         logger.info("Could not find any main.js format. Dumping page content for inspection:")
         try:
