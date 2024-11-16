@@ -84,7 +84,7 @@ async def get_tg_clients() -> list[Client]:
 def fetch_username(query):
     try:
         fetch_data = unquote(query).split("user=")[1].split("&chat_instance=")[0]
-      json_data = json.loads(fetch_data)
+        json_data = json.loads(fetch_data)
         return json_data['username']
     except:
         try:
@@ -99,7 +99,6 @@ def fetch_username(query):
             except:
                 logger.warning(f"Invaild query: {query}")
                 sys.exit()
-
 
 async def get_user_agent(session_name):
     async with AIOFile('user_agents.json', 'r') as file:
