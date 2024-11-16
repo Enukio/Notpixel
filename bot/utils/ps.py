@@ -3,9 +3,17 @@ import re
 import os
 from bot.utils import logger
 
-baseUrl = "https://notpx.app/api/v1/"
+# Base API URL
+base_api_url = "https://notpx.app/api/v1/"
+base_page_url = "https://app.notpx.app/"
+js_save_path = "local_index.js"  # Path to save the updated JS file
 
-apis = [
+# Patterns for detecting JavaScript and API references
+js_file_pattern = re.compile(r'src="(/.*?/index.*?\.js)"')
+api_pattern = re.compile(r'["\'](/api/v1/.*?)["\']')
+
+# Expected API endpoints
+expected_apis = [
     "/users/me",
     "/users/stats",
     "/image/template/my",
@@ -16,92 +24,77 @@ apis = [
     "/mining/task/check/"
 ]
 
-# Regular expressions for patterns
-ls_pattern = re.compile(r'\b[a-zA-Z]+\s*=\s*["\'](https?://[^"\']+)["\']')
-e_get_pattern = re.compile(r'[a-zA-Z]\.get\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
-e_put_pattern = re.compile(r'[a-zA-Z]\.put\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
 
-
-def clean_url(url):
-    """Clean the URL by removing dynamic segments."""
-    url = url.split('?')[0]
-    url = re.sub(r'\$\{.*?\}', '', url)
-    url = re.sub(r'//+', '/', url)
-    return url
-
-
-def get_main_js_format(base_url):
-    """Fetch the base URL and look for JavaScript files matching 'index.*.js'."""
+def fetch_page_content(url):
+    """Fetch the HTML content of a webpage."""
     try:
-        response = requests.get(base_url)
+        response = requests.get(url)
         response.raise_for_status()
-        content = response.text
-        matches = re.findall(r'src="(/.*?/index.*?\.js)"', content)
-        return sorted(set(matches), key=len, reverse=True) if matches else None
+        return response.text
     except requests.RequestException as e:
-        logger.warning(f"Error fetching the base URL: {e}")
+        logger.warning(f"Error fetching page content from {url}: {e}")
         return None
 
 
-def fetch_and_save_js(file_url, save_path):
-    """Fetch the latest JavaScript file and save it locally."""
+def fetch_js_files(page_content):
+    """Extract JavaScript file paths from the page content."""
+    matches = js_file_pattern.findall(page_content)
+    return sorted(set(matches), key=len, reverse=True) if matches else None
+
+
+def fetch_and_save_js(js_url, save_path):
+    """Download and save the JavaScript file locally."""
     try:
-        response = requests.get(file_url)
+        response = requests.get(js_url)
         response.raise_for_status()
         with open(save_path, 'wb') as file:
             file.write(response.content)
         logger.success(f"Updated JS file saved to {save_path}")
     except requests.RequestException as e:
-        logger.warning(f"Failed to fetch the updated JS file: {e}")
+        logger.warning(f"Failed to fetch the JS file from {js_url}: {e}")
 
 
-def get_base_api(url):
-    """Check for changes in the API structure."""
+def verify_apis_in_js(js_url):
+    """Check if the required APIs are present in the JavaScript file."""
     try:
-        logger.info("Checking for changes in the API...")
-        response = requests.get(url)
+        response = requests.get(js_url)
         response.raise_for_status()
         content = response.text
-        e_get_urls = e_get_pattern.findall(content)
-        e_put_urls = e_put_pattern.findall(content)
-
-        urls = [url[0] if url[0] else url[1] for url in e_get_urls]
-        urls_put = [url[0] if url[0] else url[1] for url in e_put_urls]
-        clean_urls = [clean_url(url) for url in urls] + [clean_url(url) for url in urls_put]
-
-        for api in apis:
-            if api not in clean_urls:
-                logger.warning(f"<yellow>API {api} changed!</yellow>")
-                return None
-
-        match = ls_pattern.findall(content)
-        return match if match else None
+        detected_apis = api_pattern.findall(content)
+        missing_apis = [api for api in expected_apis if api not in detected_apis]
+        if missing_apis:
+            logger.warning(f"Missing APIs: {missing_apis}")
+            return False
+        return True
     except requests.RequestException as e:
-        logger.warning(f"Error fetching the JS file: {e}")
-        return None
-
-
-def check_and_auto_update():
-    """Check the base URL for updates and auto-fetch the latest file if needed."""
-    base_url = "https://app.notpx.app/"
-    main_js_formats = get_main_js_format(base_url)
-    save_path = "local_index.js"
-
-    if main_js_formats:
-        for js_file in main_js_formats:
-            full_url = f"https://app.notpx.app{js_file}"
-            result = get_base_api(full_url)
-
-            if result is None:
-                logger.warning("Mismatch detected. Fetching the updated file...")
-                fetch_and_save_js(full_url, save_path)
-                return False
-
-            if baseUrl in result:
-                logger.success("<green>No changes detected in the API!</green>")
-                return True
-        logger.warning("Could not find 'baseUrl' in any of the JS files.")
+        logger.warning(f"Error fetching JS file for API verification: {e}")
         return False
-    else:
-        logger.info("No JS file formats found. Manual inspection required.")
-        return False
+
+
+def auto_update_js():
+    """Main function to check and auto-update the JavaScript file."""
+    logger.info("Checking for JavaScript updates...")
+    page_content = fetch_page_content(base_page_url)
+    if not page_content:
+        logger.warning("Failed to fetch the base page content.")
+        return
+
+    js_files = fetch_js_files(page_content)
+    if not js_files:
+        logger.warning("No JavaScript files found on the base page.")
+        return
+
+    for js_file in js_files:
+        js_url = f"{base_page_url.rstrip('/')}{js_file}"
+        logger.info(f"Checking JavaScript file: {js_url}")
+
+        if verify_apis_in_js(js_url):
+            logger.success("No changes detected in API structure. File is up-to-date.")
+        else:
+            logger.warning("Changes detected. Fetching updated JavaScript file...")
+            fetch_and_save_js(js_url, js_save_path)
+            break  # Stop after handling the first update
+
+
+if __name__ == "__main__":
+    auto_update_js()
