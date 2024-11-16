@@ -9,7 +9,14 @@ logger.add(
            " | <level>{level: <8}</level>"
            " | <cyan><b>{line}</b></cyan>"
            " - <white><b>{message}</b></white>")
+
 logger = logger.opt(colors=True)
 
-except Exception as e:
+if __name__ == "__main__":
+    df = load_data("data.parquet", columns=["count"])
+    logger.info("Data Loaded")
+
+    logger.info("Loading Model")
+    nlp = spacy.load("en_core_web_lg", disable=["ner"])
+    logger.info(f"loaded model. Pipeline: {nlp.pipe_names}")
     logger.error(f"Failed to configure logger: {e}")
