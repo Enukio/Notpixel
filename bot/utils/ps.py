@@ -101,13 +101,15 @@ def check_base_url(output_dir="./"):
 
     if main_js_formats:
         if settings.ADVANCED_ANTI_DETECTION:
-            # Fetch the expected JS version
+            # Fetch the expected JS version from a local file
             try:
-                r = requests.get("https://raw.githubusercontent.com/Enukio/Nothing/refs/heads/main/px")
-                r.raise_for_status()
-                js_ver = r.text.strip()
-            except requests.RequestException as e:
-                logger.warning(f"Error fetching the expected JS version: {e}")
+                with open("expected_version.txt", "r") as file:
+                    js_ver = file.read().strip()  # Read the expected version
+            except FileNotFoundError:
+                logger.warning("Expected version file not found.")
+                return False
+            except Exception as e:
+                logger.warning(f"Error reading expected version file: {e}")
                 return False
 
             # Check if the version exists in the fetched files
@@ -115,6 +117,7 @@ def check_base_url(output_dir="./"):
                 if js_ver in js:
                     logger.success(f"<green>No change in js file: {js_ver}</green>")
                     return True
+
             logger.warning(f"<yellow>Expected JS version {js_ver} not found!</yellow>")
             return False
         else:
