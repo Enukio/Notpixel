@@ -177,6 +177,15 @@ class Tapper:
             # print(response.text)
             logger.warning(f"{self.session_name} | Faled to repaint: {response.status_code}")
 
+        elif response.status_code == 500:
+        logger.error(
+            f"{self.session_name} | Failed to repaint: Internal Server Error. Retrying might help. Response: {response.text}"
+        )
+    else:
+        logger.warning(
+            f"{self.session_name} | Unexpected response code {response.status_code}. Response: {response.text}"
+        )
+
     async def auto_upgrade_paint(self, session):
         if self.user_upgrades['paintReward'] >= self.max_lvl['paintReward']:
             self.is_max_lvl['paintReward'] = True
