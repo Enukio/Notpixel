@@ -397,10 +397,6 @@ logger.debug(f"Payload for repaint: {payload}")
             logger.warning(f"{self.session_name} | Faled to repaint: {res.status_code}")
             return False
 
-if res.status_code != 200:
-    logger.warning(f"{self.session_name} | Failed to repaint: {res.status_code} | Response: {res.text}")
-    return False
-
     async def repaintV5(self, session, template_info):
         try:
             if not template_info:
