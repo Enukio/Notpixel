@@ -139,6 +139,8 @@ class Tapper:
             return None
 
     def generate_random_color(self, color):
+        if len(self.color_list) <= 1:
+            return self.color_list[0]
         a = random.choice(self.color_list)
         while a == color:
             a = random.choice(self.color_list)
@@ -232,24 +234,17 @@ class Tapper:
                     logger.error(
                         f"{self.session_name} | <red>Unknown error while subscribing to template {template_id}: <light-yellow>{e}</light-yellow> </red>")
 
-        res = session.post(f"{API_GAME_ENDPOINT}/repaint/start", headers=headers, json=payload)
-        res.raise_for_status()
-        return True
-    except requests.HTTPError as e:
-        logger.error(f"Attempt {attempt+1}: Error repainting: {e}")
-        if res.status_code == 500:
-            await asyncio.sleep(5)  # Wait before retrying
-    except Exception as e:
-        logger.error(f"Unexpected error: {e}")
-        break
-
     async def get_template(self, session):
         for attempts in range(3):
             try:
                 res = session.get(f'{API_GAME_ENDPOINT}/image/template/my', headers=headers)
 
                 if res.status_code == 200:
-                    return res.json()
+                    try:
+                        return res.json()
+                    except json.JSONDecodeError:
+                        logger.error("Invalid JSON received for template.")
+                        return None
                 else:
                     return None
             except Exception as e:
@@ -293,7 +288,7 @@ class Tapper:
         try:
             tmpl = await self.notpx_template(session)
             self.template_to_join = template_to_join(tmpl)
-            return str(tmpl) != self.template_to_join
+            return tmpl != int(self.template_to_join)
         except Exception as error:
             logger.error(f"Failed to determine template join requirement: {error}")
             return False
@@ -375,9 +370,21 @@ class Tapper:
                 await asyncio.sleep(10)
                 logger.info(f"{self.session_name} | Retry after 10 seconds...")
                 await self.paint(session, retries=retries - 1)
-                
-logger.debug(f"Payload for repaint: {payload}")
-    def paintv2(self, session, x, y, color, chance_left):
+
+    def paintv2(self, session, x, y, color, chance_left, retries=3):
+        pxId = y * 1000 + x + 1
+        payload = {"pixelId": pxId, "newColor": color}
+        for attempt in range(retries):
+            res = session.post(f"{API_GAME_ENDPOINT}/repaint/start", headers=headers, json=payload)
+            if res.status_code == 200:
+                self.balance = int(res.json()['balance'])
+                logger.success(f"{self.session_name} | Painted {pxId} successfully.")
+                return True
+            elif attempt < retries - 1:
+                logger.warning(f"Retrying paint attempt for {pxId}.")
+                time.sleep(2)
+        logger.error(f"Failed to paint after {retries} retries.")
+        return False
         pxId = y * 1000 + x + 1
         payload = {
             "pixelId": pxId,
@@ -552,6 +559,13 @@ logger.debug(f"Payload for repaint: {payload}")
                 return
 
     async def run(self, proxy: str | None, ua: str) -> None:
+        async with CloudflareScraper(headers=headers, connector=proxy_conn) as http_client:
+            session = cloudscraper.create_scraper()
+            try:
+                # Main logic
+                pass
+            finally:
+                session.close()
         access_token_created_time = 0
         proxy_conn = ProxyConnector().from_url(proxy) if proxy else None
 
@@ -579,11 +593,11 @@ logger.debug(f"Payload for repaint: {payload}")
                     if settings.ADVANCED_ANTI_DETECTION:
                         self.can_run = False
                         logger.warning(
-                            "<yellow>Detected index js file change. Contact me to check if it's safe to continue: https://t.me/vanhbakaaa </yellow>")
+                            "<yellow>Detected index js file change. </yellow>")
                     else:
                         self.can_run = False
                         logger.warning(
-                            "<yellow>Detected api change! Stoped the bot for safety. Contact me here to update the bot: https://t.me/vanhbakaaa </yellow>")
+                            "<yellow>Detected api change! Stoped the bot for safety. </yellow>")
                 else:
                     self.can_run = True
 
@@ -818,9 +832,29 @@ def fetch_username(query):
                 logger.warning(f"Invaild query: {query}")
                 sys.exit()
 
-async def run_query_tapper1(querys: list[str]):
+async def run_query_tapper1(querys: list[str], max_retries=5):
+    retries = {query: 0 for query in querys}
 
     while True:
+        for query in querys:
+            try:
+                await Tapper(query=query, multi_thread=False).run(
+                    proxy=await lc.get_proxy(fetch_username(query)),
+                    ua=await get_user_agent(fetch_username(query))
+                )
+            except InvalidSession:
+                logger.error(f"Invalid Query: {query}")
+                retries[query] += 1
+                if retries[query] >= max_retries:
+                    logger.error(f"Max retries reached for query: {query}. Skipping.")
+                    querys.remove(query)
+            sleep_ = randint(settings.DELAY_EACH_ACCOUNT[0], settings.DELAY_EACH_ACCOUNT[1])
+            logger.info(f"Sleeping for {sleep_} seconds...")
+            await asyncio.sleep(sleep_)
+
+        if not querys:
+            logger.info("All queries processed or skipped.")
+            break
         for query in querys:
             try:
                 await Tapper(query=query,multi_thread=False).run(proxy=await lc.get_proxy(fetch_username(query)),
