@@ -149,7 +149,13 @@ class Tapper:
     def generate_random_pos(self):
         return randint(1, 1000000)
 
-    def repaintV2(self, session, chance_left, i, data):
+    def repaintV2(self, session, chance_left, i, data, retries=3):
+    """
+    Attempts to repaint a pixel with enhanced error handling and retry logic.
+    """
+    for attempt in range(1, retries + 1):
+        try:
+        # Determine the payload based on the iteration type
         if i % 2 == 0:
             payload = {
                 "newColor": data[0],
@@ -157,11 +163,13 @@ class Tapper:
             }
 
         else:
-            data1 = [str(self.generate_random_color(data[0])), int(self.generate_random_pos())]
+            random_data = [self.generate_random_color(data[0]), self.generate_random_pos()]
             payload = {
                 "newColor": data1[0],
                 "pixelId": data[1]
             }
+            
+        # Send the repaint request
         response = session.post(f"{API_GAME_ENDPOINT}/repaint/start", headers=headers, json=payload)
         if response.status_code == 200:
             if i % 2 == 0:
@@ -173,9 +181,25 @@ class Tapper:
                 logger.success(
                     f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data1[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
                 self.balance = int(response.json()['balance'])
+            return True
         else:
-            # print(response.text)
-            logger.warning(f"{self.session_name} | Faled to repaint: {response.status_code}")
+
+                            logger.warning(
+                    f"{self.session_name} | Attempt {attempt}/{retries} - Failed to repaint: {response.status_code}, "
+                    f"Response: {response.text}"
+                )
+
+        except requests.exceptions.RequestException as error:
+            logger.error(
+                f"{self.session_name} | Attempt {attempt}/{retries} - Error during repaint: {error}"
+            )
+
+        # Wait before retrying
+        time.sleep(2)
+
+    # Log a failure after all retries
+    logger.error(f"{self.session_name} | Failed to repaint after {retries} attempts.")
+    return False
 
     async def auto_upgrade_paint(self, session):
         if self.user_upgrades['paintReward'] >= self.max_lvl['paintReward']:
