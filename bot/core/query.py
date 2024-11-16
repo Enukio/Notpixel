@@ -149,35 +149,55 @@ class Tapper:
     def generate_random_pos(self):
         return randint(1, 1000000)
 
-    def repaintV2(self, session, chance_left, i, data):
+def repaintV2(self, session, chance_left, i, data):
+
+    if i % 2 == 0:
+        payload = {
+            "newColor": data[0],
+            "pixelId": data[1]
+        }
+    else:
+        data1 = [str(self.generate_random_color(data[0])), int(self.generate_random_pos())]
+        payload = {
+            "newColor": data1[0],
+            "pixelId": data[1]
+        }
+
+    response = session.post(f"{API_GAME_ENDPOINT}/repaint/start", headers=headers, json=payload)
+
+    if response.status_code == 200:
         if i % 2 == 0:
-            payload = {
-                "newColor": data[0],
-                "pixelId": data[1]
-            }
-
+            logger.success(
+                f"{self.session_name} | Painted pixel {data[1]} successfully with color {data[0]} | "
+                f"Earned: {int(response.json()['balance']) - self.balance} | Balance: {response.json()['balance']} | "
+                f"Repaints left: {chance_left}"
+            )
+            self.balance = int(response.json()['balance'])
         else:
-            data1 = [str(self.generate_random_color(data[0])), int(self.generate_random_pos())]
-            payload = {
-                "newColor": data1[0],
-                "pixelId": data[1]
-            }
-        response = session.post(f"{API_GAME_ENDPOINT}/repaint/start", headers=headers, json=payload)
-        if response.status_code == 200:
-            if i % 2 == 0:
-                logger.success(
-                    f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
-                self.balance = int(response.json()['balance'])
-
-            else:
-                logger.success(
-                    f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data1[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
-                self.balance = int(response.json()['balance'])
-        else:
-            # print(response.text)
-            logger.warning(f"{self.session_name} | Faled to repaint: {response.status_code}")
-
-        elif response.status_code == 500:
+            logger.success(
+                f"{self.session_name} | Painted pixel {data[1]} successfully with random color {data1[0]} | "
+                f"Earned: {int(response.json()['balance']) - self.balance} | Balance: {response.json()['balance']} | "
+                f"Repaints left: {chance_left}"
+            )
+            self.balance = int(response.json()['balance'])
+    elif response.status_code == 400:
+        logger.error(
+            f"{self.session_name} | Failed to repaint: Bad Request. Check payload {payload}. Response: {response.text}"
+        )
+    elif response.status_code == 401:
+        logger.error(
+            f"{self.session_name} | Failed to repaint: Unauthorized. Please check authentication."
+        )
+    elif response.status_code == 403:
+        logger.warning(
+            f"{self.session_name} | Failed to repaint: Forbidden. Permission might be missing."
+        )
+    elif response.status_code == 429:
+        logger.warning(
+            f"{self.session_name} | Failed to repaint: Too Many Requests. Retrying after a delay."
+        )
+        time.sleep(10)  # Handle rate limit delay
+    elif response.status_code == 500:
         logger.error(
             f"{self.session_name} | Failed to repaint: Internal Server Error. Retrying might help. Response: {response.text}"
         )
@@ -185,6 +205,7 @@ class Tapper:
         logger.warning(
             f"{self.session_name} | Unexpected response code {response.status_code}. Response: {response.text}"
         )
+
 
     async def auto_upgrade_paint(self, session):
         if self.user_upgrades['paintReward'] >= self.max_lvl['paintReward']:
