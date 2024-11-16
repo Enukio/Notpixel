@@ -87,7 +87,7 @@ def get_base_api(url):
         if match:
             return match
         else:
-            logger.info("Could not find 'api' in the content.")
+            logger.info("Could not find 'API' in the content.")
             return None
 
     except requests.RequestException as e:
@@ -95,29 +95,37 @@ def get_base_api(url):
         return None
 
 def check_base_url(output_dir="./"):
+    """Check the base URL for JavaScript files and process them."""
     base_url = "https://app.notpx.app/"
     main_js_formats = get_main_js_format(base_url, output_dir)
 
     if main_js_formats:
         for format in main_js_formats:
             full_url = f"https://app.notpx.app{format}"
+            js_ver = os.path.basename(format)  # Extract the JS file name/version
             result = get_base_api(full_url)
+
             if result is None:
-                return False
+                logger.warning(f"No change in API detected for {full_url}")
+                continue
 
             if baseUrl in result:
-                logger.success("<green>No change in API!</green>")
+                logger.success(f"<green>No change in js file: {js_ver}</green>")
                 return True
-            return False
-        else:
-            logger.warning("Could not find 'baseURL' in any of the JS files.")
-            return False
+
+        logger.warning("Could not find 'baseURL' in any of the JS files.")
+        return False
     else:
         logger.info("Could not find any main.js format. Dumping page content for inspection:")
         try:
             response = requests.get(base_url)
-            print(response.text[:1000])  # Print first 1000 characters of the page
+            print(response.text[:1000])  # Print first 1000 characters of the page for debugging
             return False
         except requests.RequestException as e:
             logger.warning(f"Error fetching the base URL for content dump: {e}")
             return False
+
+# Example usage in ps.py
+if __name__ == "__main__":
+    os.makedirs("downloads", exist_ok=True)
+    check_base_url(output_dir="./downloads")
