@@ -232,6 +232,19 @@ class Tapper:
                     logger.error(
                         f"{self.session_name} | <red>Unknown error while subscribing to template {template_id}: <light-yellow>{e}</light-yellow> </red>")
 
+for attempt in range(3):  # Retry up to 3 times
+    try:
+        res = session.post(f"{API_GAME_ENDPOINT}/repaint/start", headers=headers, json=payload)
+        res.raise_for_status()
+        return True
+    except requests.HTTPError as e:
+        logger.error(f"Attempt {attempt+1}: Error repainting: {e}")
+        if res.status_code == 500:
+            await asyncio.sleep(5)  # Wait before retrying
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}")
+        break
+
     async def get_template(self, session):
         for attempts in range(3):
             try:
@@ -364,7 +377,8 @@ class Tapper:
                 await asyncio.sleep(10)
                 logger.info(f"{self.session_name} | Retry after 10 seconds...")
                 await self.paint(session, retries=retries - 1)
-
+                
+logger.debug(f"Payload for repaint: {payload}")
     def paintv2(self, session, x, y, color, chance_left):
         pxId = y * 1000 + x + 1
         payload = {
@@ -382,6 +396,10 @@ class Tapper:
         else:
             logger.warning(f"{self.session_name} | Faled to repaint: {res.status_code}")
             return False
+
+if res.status_code != 200:
+    logger.warning(f"{self.session_name} | Failed to repaint: {res.status_code} | Response: {res.text}")
+    return False
 
     async def repaintV5(self, session, template_info):
         try:
