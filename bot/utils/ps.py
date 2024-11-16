@@ -1,152 +1,54 @@
-import requests
-import re
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
 import os
-from bot.config import settings
-from bot.utils import logger
+import requests
 
-baseUrl = "https://notpx.app/api/v1/"
+def download_index_file_with_selenium(base_url, download_path="downloads"):
+    """
+    Uses Selenium to download a dynamically loaded JavaScript index file.
 
-apis = [
-    "/users/me",
-    "/users/stats",
-    "/image/template/my",
-    "/mining/status",
-    "/image/template/subscribe/",
-    "/mining/claim",
-    "/mining/boost/check/",
-    "/mining/task/check/"
-]
-ls_pattern = re.compile(r'\b[a-zA-Z]+\s*=\s*["\'](https?://[^"\']+)["\']')
-e_get_pattern = re.compile(r'[a-zA-Z]\.get\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
-e_put_pattern = re.compile(r'[a-zA-Z]\.put\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
-
-def clean_url(url):
-    url = url.split('?')[0]
-    url = re.sub(r'\$\{.*?\}', '', url)
-    url = re.sub(r'//+', '/', url)
-    return url
-
-def download_js_file(full_url, output_dir="./"):
-    """Download and save a JavaScript file to the specified directory."""
+    :param base_url: The base URL to scrape and download from.
+    :param download_path: The directory to save the downloaded file.
+    """
     try:
-        response = requests.get(full_url)
-        response.raise_for_status()
-        file_name = os.path.basename(full_url)
-        output_path = os.path.join(output_dir, file_name)
+        print(f"Opening browser to {base_url}...")
 
-        with open(output_path, "w", encoding="utf-8") as file:
-            file.write(response.text)
-        logger.success(f"Downloaded: {file_name}")
-        return True
-    except requests.RequestException as e:
-        logger.warning(f"Error downloading file {full_url}: {e}")
-        return False
+        # Setup Selenium WebDriver
+        service = Service("path/to/chromedriver")  # Update with your ChromeDriver path
+        driver = webdriver.Chrome(service=service)
+        driver.get(base_url)
 
-def get_main_js_format(base_url, output_dir="./"):
-    """Get and download main JavaScript files."""
-    try:
-        response = requests.get(base_url)
-        response.raise_for_status()
-        content = response.text
-        matches = re.findall(r'src="(/.*?/index.*?\.js)"', content)
-        if matches:
-            matches = sorted(set(matches), key=len, reverse=True)
-            for match in matches:
-                full_url = f"https://notpx.app{match}"
-                download_js_file(full_url, output_dir)
-            return matches
-        else:
-            logger.info("No matching JavaScript files found.")
-            return None
-    except requests.RequestException as e:
-        logger.warning(f"Error fetching the base URL: {e}")
-        return None
+        # Wait for the page to load and find JS files
+        driver.implicitly_wait(10)
+        js_files = driver.find_elements(By.XPATH, "//script[contains(@src, 'index-')]")
+        
+        if not js_files:
+            print("No matching index files found on the page.")
+            return
 
-def get_base_api(url):
-    try:
-        logger.info("Checking for changes in API...")
-        response = requests.get(url)
-        response.raise_for_status()
-        content = response.text
-        match = ls_pattern.findall(content)
-        e_get_urls = e_get_pattern.findall(content)
-        e_put_urls = e_put_pattern.findall(content)
+        # Get the first match (update if you want to handle multiple files)
+        js_url = js_files[0].get_attribute("src")
+        print(f"Found file: {js_url}")
 
-        if e_get_urls is None:
-            return None
+        # Download the file using requests
+        os.makedirs(download_path, exist_ok=True)
+        file_name = os.path.basename(js_url)
+        file_response = requests.get(js_url)
+        file_response.raise_for_status()
 
-        urls = [url[0] if url[0] else url[1] for url in e_get_urls]
-        urls_put = [url[0] if url[0] else url[1] for url in e_put_urls]
-        clean_urls = [clean_url(url) for url in urls] + [clean_url(url) for url in urls_put]
+        # Save the file locally
+        file_path = os.path.join(download_path, file_name)
+        with open(file_path, "wb") as file:
+            file.write(file_response.content)
 
-        for url in apis:
-            if url not in clean_urls:
-                logger.warning(f"<yellow>API {url} changed!</yellow>")
-                return None
+        print(f"File successfully downloaded to: {file_path}")
 
-        if match:
-            return match
-        else:
-            logger.info("Could not find 'API' in the content.")
-            return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        driver.quit()
 
-    except requests.RequestException as e:
-        logger.warning(f"Error fetching the JS file: {e}")
-        return None
-
-def check_base_url(output_dir="./"):
-    """Check the base URL for JavaScript files and process them."""
-    base_url = "https://app.notpx.app/"
-    main_js_formats = get_main_js_format(base_url, output_dir)
-
-    if main_js_formats:
-        if settings.ADVANCED_ANTI_DETECTION:
-            # Fetch the expected JS version from a local file
-            try:
-                with open("expected_version.txt", "r") as file:
-                    js_ver = file.read().strip()  # Read the expected version
-            except FileNotFoundError:
-                logger.warning("Expected version file not found.")
-                return False
-            except Exception as e:
-                logger.warning(f"Error reading expected version file: {e}")
-                return False
-
-            # Check if the version exists in the fetched files
-            for js in main_js_formats:
-                if js_ver in js:
-                    logger.success(f"<green>No change in js file: {js_ver}</green>")
-                    return True
-
-            logger.warning(f"<yellow>Expected JS version {js_ver} not found!</yellow>")
-            return False
-        else:
-            for format in main_js_formats:
-                full_url = f"https://app.notpx.app{format}"
-                js_ver = os.path.basename(format)  # Extract the JS file name/version
-                result = get_base_api(full_url)
-
-                if result is None:
-                    logger.warning(f"No change in API detected for {full_url}")
-                    continue
-
-                if baseUrl in result:
-                    logger.success(f"<green>No change in js file: {js_ver}</green>")
-                    return True
-
-            logger.warning("Could not find 'baseURL' in any of the JS files.")
-            return False
-    else:
-        logger.info("Could not find any main.js format. Dumping page content for inspection:")
-        try:
-            response = requests.get(base_url)
-            print(response.text[:1000])  # Print first 1000 characters of the page for debugging
-            return False
-        except requests.RequestException as e:
-            logger.warning(f"Error fetching the base URL for content dump: {e}")
-            return False
-
-# Example usage in ps.py
 if __name__ == "__main__":
-    os.makedirs("downloads", exist_ok=True)
-    check_base_url(output_dir="./downloads")
+    base_url = "https://app.notpx.app"
+    download_index_file_with_selenium(base_url)
