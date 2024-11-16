@@ -150,9 +150,7 @@ class Tapper:
         return randint(1, 1000000)
 
     def repaintV2(self, session, chance_left, i, data, retries=3):
-    """
-    Attempts to repaint a pixel with enhanced error handling and retry logic.
-    """
+
     for attempt in range(1, retries + 1):
         try:
         # Determine the payload based on the iteration type
