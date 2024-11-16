@@ -28,12 +28,6 @@ e_put_pattern = re.compile(r'[a-zA-Z]\.put\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)
     wait=wait_exponential(multiplier=1, min=1, max=10),
     reraise=True
 )
-def fetch_url_with_retries(url, timeout=10):
-    """Fetch a URL with retries and exponential backoff."""
-    logger.info(f"Fetching URL: {url}")
-    response = requests.get(url, timeout=timeout)
-    response.raise_for_status()
-    return response
 
 def clean_url(url):
     url = url.split('?')[0]
