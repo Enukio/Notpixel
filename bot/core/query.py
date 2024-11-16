@@ -232,8 +232,6 @@ class Tapper:
                     logger.error(
                         f"{self.session_name} | <red>Unknown error while subscribing to template {template_id}: <light-yellow>{e}</light-yellow> </red>")
 
-for attempt in range(3):  # Retry up to 3 times
-    try:
         res = session.post(f"{API_GAME_ENDPOINT}/repaint/start", headers=headers, json=payload)
         res.raise_for_status()
         return True
