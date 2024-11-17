@@ -1,6 +1,6 @@
 import requests
 import re
-
+import os
 from bot.config import settings
 from bot.utils import logger
 
@@ -82,14 +82,17 @@ def check_base_url():
     main_js_formats = get_main_js_format(base_url)
 
     if main_js_formats:
-        if settings.ADVANCED_ANTI_DETECTION:
-    with open("px", "r") as file:  # Replace with the actual file path
+if settings.ADVANCED_ANTI_DETECTION:
+    current_dir = os.path.dirname(__file__)  # Get the directory of the current script
+    file_path = os.path.join(current_dir, "px")  # Combine it with the file name
+    
+    with open(file_path, "r") as file:
         js_ver = file.read().strip()
-        for js in main_js_formats:
-                if js_ver in js:
-                    logger.success(f"<green>No change in js file: {js_ver}</green>")
-                    return True
-            return False
+    for js in main_js_formats:
+        if js_ver in js:
+            logger.success(f"<green>No change in js file: {js_ver}</green>")
+            return True
+    return False
         else:
             for format in main_js_formats:
                 logger.info(f"Trying format: {format}")
