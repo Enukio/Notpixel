@@ -95,6 +95,31 @@ class Tapper:
         self.completed_task = None
         self.query_anti = None
 
+        # Add the run method
+    async def run(self):
+        # Example of what the run method can do
+        print(f"Running Tapper with session name: {self.session_name}")
+        
+        # Example: Check if we can run based on some condition
+        if not self.can_run:
+            print("Tapper cannot run at the moment.")
+            return
+        
+        # Start some task (dummy example)
+        print(f"Running with multi_thread={self.multi_thread}")
+        
+        # Simulate a task with asyncio
+        await self.simulate_task()
+        
+        # Additional logic for the run method (this can be customized)
+        print(f"Completed tasks for {self.session_name}")
+    
+    # Example async task simulation
+    async def simulate_task(self):
+        print("Simulating task...")
+        await asyncio.sleep(2)  # Simulate a task that takes time
+        print("Task simulation complete.")
+
     async def get_tg_web_data(self, proxy: str | None) -> str:
         try:
             if settings.REF_LINK == "":
