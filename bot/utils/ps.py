@@ -26,6 +26,27 @@ def clean_url(url):
     url = re.sub(r'//+', '/', url)
     return url
 
+def read_px_from_two_dirs_up():
+    # Get the directory two levels up from the current file's location
+    current_dir = os.path.dirname(__file__)  # Directory of the current file
+    two_dirs_up = os.path.abspath(os.path.join(current_dir, "../../"))
+    
+    # Construct the path to the 'px' file
+    px_file_path = os.path.join(two_dirs_up, "px")
+    
+    # Read the 'px' file if it exists
+    if os.path.exists(px_file_path):
+        try:
+            with open(px_file_path, "r") as file:
+                content = file.read().strip()
+                return content
+        except Exception as e:
+            logger.warning(f"Error reading 'px': {e}")
+            return None
+    else:
+        logger.warning(f"The file 'px' does not exist in {two_dirs_up}.")
+        return None
+
 def get_main_js_format(base_url):
     try:
         response = requests.get(base_url)
@@ -79,21 +100,15 @@ def check_base_url():
 
     if main_js_formats:
         if settings.ADVANCED_ANTI_DETECTION:
-            # Using ./px to read the file
-            try:
-                current_dir = os.path.dirname(__file__)  # Get the script's directory
-                file_path = os.path.join(current_dir, "px")  # File "px" must be in the same directory
-
-                with open(file_path, "r") as file:
-                    js_ver = file.read().strip()
-                
+            # Using px from two directories up
+            px_content = read_px_from_two_dirs_up()
+            if px_content:
                 for js in main_js_formats:
-                    if js_ver in js:
-                        logger.success(f"<green>No change in js file: {js_ver}</green>")
+                    if px_content in js:
+                        logger.success(f"<green>No change in js file: {px_content}</green>")
                         return True
-                return False
-            except FileNotFoundError:
-                logger.warning("The file 'px' was not found in the current directory.")
+            else:
+                logger.warning("Failed to read px content.")
                 return False
         else:
             for format in main_js_formats:
