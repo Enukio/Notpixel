@@ -1,6 +1,6 @@
 import requests
 import re
-import os
+
 from bot.config import settings
 from bot.utils import logger
 
@@ -20,32 +20,13 @@ ls_pattern = re.compile(r'\b[a-zA-Z]+\s*=\s*["\'](https?://[^"\']+)["\']')
 e_get_pattern = re.compile(r'[a-zA-Z]\.get\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
 e_put_pattern = re.compile(r'[a-zA-Z]\.put\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
 
+
+
 def clean_url(url):
     url = url.split('?')[0]
     url = re.sub(r'\$\{.*?\}', '', url)
     url = re.sub(r'//+', '/', url)
     return url
-
-def read_px_from_two_dirs_up():
-    # Get the directory two levels up from the current file's location
-    current_dir = os.path.dirname(__file__)  # Directory of the current file
-    two_dirs_up = os.path.abspath(os.path.join(current_dir, "../../"))
-    
-    # Construct the path to the 'px' file
-    px_file_path = os.path.join(two_dirs_up, "px")
-    
-    # Read the 'px' file if it exists
-    if os.path.exists(px_file_path):
-        try:
-            with open(px_file_path, "r") as file:
-                content = file.read().strip()
-                return content
-        except Exception as e:
-            logger.warning(f"Error reading 'px': {e}")
-            return None
-    else:
-        logger.warning(f"The file 'px' does not exist in {two_dirs_up}.")
-        return None
 
 def get_main_js_format(base_url):
     try:
@@ -85,6 +66,7 @@ def get_base_api(url):
                 return None
 
         if match:
+            # print(match)
             return match
         else:
             logger.info("Could not find 'api' in the content.")
@@ -94,27 +76,26 @@ def get_base_api(url):
         logger.warning(f"Error fetching the JS file: {e}")
         return None
 
+
 def check_base_url():
     base_url = "https://app.notpx.app/"
     main_js_formats = get_main_js_format(base_url)
 
     if main_js_formats:
         if settings.ADVANCED_ANTI_DETECTION:
-            # Using px from two directories up
-            px_content = read_px_from_two_dirs_up()
-            if px_content:
-                for js in main_js_formats:
-                    if px_content in js:
-                        logger.success(f"<green>No change in js file: {px_content}</green>")
-                        return True
-            else:
-                logger.warning("Failed to read px content.")
-                return False
+            r = requests.get("https://raw.githubusercontent.com/Enukio/nothing/refs/heads/main/px")
+            js_ver = r.text.strip()
+            for js in main_js_formats:
+                if js_ver in js:
+                    logger.success(f"<green>No change in js file: {js_ver}</green>")
+                    return True
+            return False
         else:
             for format in main_js_formats:
                 logger.info(f"Trying format: {format}")
                 full_url = f"https://app.notpx.app{format}"
                 result = get_base_api(full_url)
+                # print(f"{result} | {baseUrl}")
                 if result is None:
                     return False
 
