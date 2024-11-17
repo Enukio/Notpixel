@@ -210,19 +210,18 @@ async def process() -> None:
 
             await run_query_tapper1(query_ids)
 
-    elif action == 4:  # Tambahkan logika ini untuk opsi "4"
-        # Path ke idx.py dua tingkat di atas direktori saat ini
+    elif action == 4:
+        # Path to idx.py two levels above the current directory
         two_up_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../idx.py"))
 
-        # Debugging: Cetak path untuk memastikan
-        print(f"Mencari idx.py di path: {two_up_path}")
-        
-        if os.path.exists(two_up_path):
-            print(f"Menjalankan idx.py di path: {two_up_path}")
-            subprocess.run([sys.executable, two_up_path])  # Jalankan idx.py
-        else:
-            print(f"File idx.py tidak ditemukan di path: {two_up_path}")
-
+        # Debugging: Print the path to ensure it's correct
+        print(f"Looking for idx.py at path: {two_up_path}")
+    
+    if os.path.exists(two_up_path):
+        print(f"Executing idx.py at path: {two_up_path}")
+        subprocess.run([sys.executable, two_up_path])  # Execute idx.py
+    else:
+        print(f"File idx.py not found at path: {two_up_path}")
 
 async def run_tasks_query(query_ids: list[str]):
     tasks = [
