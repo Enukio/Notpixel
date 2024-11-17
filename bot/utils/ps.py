@@ -77,6 +77,13 @@ def get_base_api(url):
         logger.warning(f"Error fetching the JS file: {e}")
         return None
 
+# Function to find the px file in the main directory
+def find_px_file(project_root):
+    for root, _, files in os.walk(project_root):
+        if "px" in files:
+            return os.path.join(root, "px")
+    return None
+
 # Function to check if the base URL has changed
 def check_base_url():
     base_url = "https://app.notpx.app/"
@@ -85,15 +92,16 @@ def check_base_url():
     if main_js_formats:
         if settings.ADVANCED_ANTI_DETECTION:
             try:
-                # Dynamically resolve the main.py directory
-                current_dir = os.path.dirname(__file__)
-                logger.info(f"Current script directory: {current_dir}")
+                # Locate the project root directory dynamically
+                project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # Adjust if needed
+                px_path = find_px_file(project_root)  # Search for the px file
 
-                main_py_dir = os.path.abspath(os.path.join(current_dir, ".."))
-                logger.info(f"Main.py directory: {main_py_dir}")
+                if not px_path:
+                    logger.error(f"The file 'px' was not found in the project directory: {project_root}")
+                    return False
 
-                px_path = os.path.join(main_py_dir, "px")
-                logger.info(f"Resolved px path: {px_path}")
+                # Debugging: Log resolved px path
+                logger.info(f"Found 'px' file at: {px_path}")
 
                 # Attempt to open and read the file
                 with open(px_path, "r") as file:
@@ -109,7 +117,7 @@ def check_base_url():
                 return False
             
             except FileNotFoundError:
-                logger.error(f"The file 'px' was not found in the directory: {main_py_dir}")
+                logger.error(f"The file 'px' was not found in the directory: {project_root}")
                 return False
             except Exception as e:
                 logger.error(f"An unexpected error occurred while reading 'px': {e}")
