@@ -77,11 +77,15 @@ def get_base_api(url):
         logger.warning(f"Error fetching the JS file: {e}")
         return None
 
-# Function to find the px file in the main directory
+# Function to find the px file using os.walk
 def find_px_file(project_root):
+    logger.info(f"Searching for 'px' file starting from: {project_root}")
     for root, _, files in os.walk(project_root):
         if "px" in files:
-            return os.path.join(root, "px")
+            px_path = os.path.join(root, "px")
+            logger.info(f"Found 'px' file at: {px_path}")
+            return px_path
+    logger.error(f"The file 'px' was not found in the project directory: {project_root}")
     return None
 
 # Function to check if the base URL has changed
@@ -97,11 +101,7 @@ def check_base_url():
                 px_path = find_px_file(project_root)  # Search for the px file
 
                 if not px_path:
-                    logger.error(f"The file 'px' was not found in the project directory: {project_root}")
                     return False
-
-                # Debugging: Log resolved px path
-                logger.info(f"Found 'px' file at: {px_path}")
 
                 # Attempt to open and read the file
                 with open(px_path, "r") as file:
