@@ -30,11 +30,10 @@ def clean_url(url):
 def get_main_js_format(base_url):
     try:
         response = requests.get(base_url)
-        response.raise_for_status()  # Raises an HTTPError for bad responses
+        response.raise_for_status()
         content = response.text
         matches = re.findall(r'src="(/.*?/index.*?\.js)"', content)
         if matches:
-            # Return all matches, sorted by length (assuming longer is more specific)
             return sorted(set(matches), key=len, reverse=True)
         else:
             return None
@@ -80,7 +79,6 @@ def check_base_url():
 
     if main_js_formats:
         if settings.ADVANCED_ANTI_DETECTION:
-            # Define the path two directories up
             two_up_path = os.path.join(os.path.dirname(__file__), "../../px")
             two_up_path = os.path.abspath(two_up_path)
 
@@ -121,3 +119,26 @@ def check_base_url():
         except requests.RequestException as e:
             logger.warning(f"Error fetching the base URL for content dump: {e}")
             return False
+
+class Tapper:
+    def __init__(self, login_url, login_payload):
+        self.login_url = login_url
+        self.login_payload = login_payload
+
+    def login(self, session):
+        response = session.post(self.login_url, data=self.login_payload)
+        try:
+            data = response.json()
+            print(data)
+            return data
+        except requests.exceptions.JSONDecodeError:
+            print("Failed to parse JSON response.")
+            print(f"Status Code: {response.status_code}")
+            print(f"Response Text: {response.text}")
+            return False
+
+    def run(self, session):
+        if self.login(session):
+            logger.info("Login successful!")
+        else:
+            logger.warning("Login failed.")
