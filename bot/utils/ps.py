@@ -92,11 +92,10 @@ def check_base_url():
         main_js_formats = get_main_js_format(base_url)
         for js in main_js_formats:
             if js_ver in js:
-                    logger.success(f"<green>No change in js file: {js_ver}</green>")
-                    return True
-            return False
-
-            except FileNotFoundError:
+                logger.success(f"<green>No change in js file: {js_ver}</green>")
+                return True
+        return False
+    except FileNotFoundError:
         logger.warning(f"File not found at: {two_up_path}")
         return False
     except Exception as e:
