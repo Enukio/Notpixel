@@ -1,4 +1,4 @@
-import requests
+import os
 import re
 
 from bot.config import settings
@@ -20,8 +20,6 @@ ls_pattern = re.compile(r'\b[a-zA-Z]+\s*=\s*["\'](https?://[^"\']+)["\']')
 e_get_pattern = re.compile(r'[a-zA-Z]\.get\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
 e_put_pattern = re.compile(r'[a-zA-Z]\.put\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
 
-
-
 def clean_url(url):
     url = url.split('?')[0]
     url = re.sub(r'\$\{.*?\}', '', url)
@@ -30,6 +28,7 @@ def clean_url(url):
 
 def get_main_js_format(base_url):
     try:
+        # Replace with reading from file logic if necessary, else keep this as-is.
         response = requests.get(base_url)
         response.raise_for_status()  # Raises an HTTPError for bad responses
         content = response.text
@@ -66,7 +65,6 @@ def get_base_api(url):
                 return None
 
         if match:
-            # print(match)
             return match
         else:
             logger.info("Could not find 'api' in the content.")
@@ -76,15 +74,23 @@ def get_base_api(url):
         logger.warning(f"Error fetching the JS file: {e}")
         return None
 
-
 def check_base_url():
     base_url = "https://app.notpx.app/"
     main_js_formats = get_main_js_format(base_url)
 
     if main_js_formats:
         if settings.ADVANCED_ANTI_DETECTION:
-            r = requests.get("https://raw.githubusercontent.com/Enukio/nothing/refs/heads/main/px")
-            js_ver = r.text.strip()
+            # Adjust path two directories up
+            file_path = os.path.join(os.path.dirname(__file__), "../../px")
+            file_path = os.path.abspath(file_path)
+
+            try:
+                with open(file_path, "r") as file:
+                    js_ver = file.read().strip()
+            except FileNotFoundError:
+                logger.error(f"File not found: {file_path}")
+                return False
+
             for js in main_js_formats:
                 if js_ver in js:
                     logger.success(f"<green>No change in js file: {js_ver}</green>")
@@ -95,14 +101,12 @@ def check_base_url():
                 logger.info(f"Trying format: {format}")
                 full_url = f"https://app.notpx.app{format}"
                 result = get_base_api(full_url)
-                # print(f"{result} | {baseUrl}")
                 if result is None:
                     return False
 
                 if baseUrl in result:
                     logger.success("<green>No change in api!</green>")
                     return True
-                return False
             else:
                 logger.warning("Could not find 'baseURL' in any of the JS files.")
                 return False
