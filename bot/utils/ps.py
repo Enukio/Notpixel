@@ -68,7 +68,15 @@ def get_base_api(url):
         return None
 
 def find_px_file(project_root):
-    """Finds the 'px' file within the project directory."""
+    """
+    Searches for the 'px' file starting from the given project root.
+
+    Args:
+        project_root (str): The root directory to start the search.
+
+    Returns:
+        str: The full path to the 'px' file if found, else None.
+    """
     logger.info(f"Searching for 'px' file starting from: {project_root}")
     for root, _, files in os.walk(project_root):
         if "px" in files:
@@ -121,3 +129,13 @@ def check_base_url():
                 return True
         logger.warning("No matching baseURL detected in JavaScript files.")
         return False
+
+if __name__ == "__main__":
+    # Example Usage: Find `px` in the "Notpixel" directory
+    notpixel_root = "/path/to/Notpixel"  # Update with your Notpixel directory
+    px_file_path = find_px_file(notpixel_root)
+
+    if px_file_path:
+        print(f"'px' file found at: {px_file_path}")
+    else:
+        print("File 'px' not found.")
