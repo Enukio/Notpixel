@@ -83,10 +83,7 @@ def check_base_url():
 
     if main_js_formats:
 if settings.ADVANCED_ANTI_DETECTION:
-    current_dir = os.path.dirname(__file__)  # Get the directory of the current script
-    file_path = os.path.join(current_dir, "px")  # Combine it with the file name
-    
-    with open(file_path, "r") as file:
+    with open("./px", "r") as file:  # The file "px" should be in the same directory as the script
         js_ver = file.read().strip()
     for js in main_js_formats:
         if js_ver in js:
