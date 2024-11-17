@@ -4,9 +4,9 @@ import os
 from bot.config import settings
 from bot.utils import logger
 
-baseUrl = "https://notpx.app/api/v1/"
-
-apis = [
+# Constants
+BASE_URL = "https://notpx.app/api/v1/"
+APIS = [
     "/users/me",
     "/users/stats",
     "/image/template/my",
@@ -16,106 +16,108 @@ apis = [
     "/mining/boost/check/",
     "/mining/task/check/"
 ]
-ls_pattern = re.compile(r'\b[a-zA-Z]+\s*=\s*["\'](https?://[^"\']+)["\']')
-e_get_pattern = re.compile(r'[a-zA-Z]\.get\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
-e_put_pattern = re.compile(r'[a-zA-Z]\.put\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
 
+# Regex patterns
+LS_PATTERN = re.compile(r'\b[a-zA-Z]+\s*=\s*["\'](https?://[^"\']+)["\']')
+E_GET_PATTERN = re.compile(r'[a-zA-Z]\.get\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
+E_PUT_PATTERN = re.compile(r'[a-zA-Z]\.put\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
+
+# Utility Functions
 def clean_url(url):
+    """Cleans a URL by removing query parameters and template expressions."""
     url = url.split('?')[0]
     url = re.sub(r'\$\{.*?\}', '', url)
     url = re.sub(r'//+', '/', url)
     return url
 
 def get_main_js_format(base_url):
+    """Fetches main.js file formats from the base URL."""
     try:
         response = requests.get(base_url)
-        response.raise_for_status()  # Raises an HTTPError for bad responses
+        response.raise_for_status()
         content = response.text
         matches = re.findall(r'src="(/.*?/index.*?\.js)"', content)
-        if matches:
-            # Return all matches, sorted by length (assuming longer is more specific)
-            return sorted(set(matches), key=len, reverse=True)
-        else:
-            return None
+        return sorted(set(matches), key=len, reverse=True) if matches else None
     except requests.RequestException as e:
         logger.warning(f"Error fetching the base URL: {e}")
         return None
 
 def get_base_api(url):
+    """Checks for API changes in the provided JavaScript file URL."""
     try:
-        logger.info("Checking for changes in api...")
+        logger.info("Checking for changes in API...")
         response = requests.get(url)
         response.raise_for_status()
         content = response.text
-        match = ls_pattern.findall(content)
-        e_get_urls = e_get_pattern.findall(content)
-        e_put_urls = e_put_pattern.findall(content)
-
-        if e_get_urls is None:
-            return None
+        matches = LS_PATTERN.findall(content)
+        e_get_urls = E_GET_PATTERN.findall(content)
+        e_put_urls = E_PUT_PATTERN.findall(content)
 
         urls = [url[0] if url[0] else url[1] for url in e_get_urls]
         urls_put = [url[0] if url[0] else url[1] for url in e_put_urls]
-        clean_urls = [clean_url(url) for url in urls] + [clean_url(url) for url in urls_put]
+        clean_urls = [clean_url(url) for url in urls + urls_put]
 
-        for url in apis:
-            if url not in clean_urls:
-                logger.warning(f"<yellow>api {url} changed!</yellow>")
+        for api in APIS:
+            if api not in clean_urls:
+                logger.warning(f"API {api} has changed!")
                 return None
 
-        if match:
-            return match
-        else:
-            logger.info("Could not find 'api' in the content.")
-            return None
-
+        return matches if matches else None
     except requests.RequestException as e:
         logger.warning(f"Error fetching the JS file: {e}")
         return None
 
+def find_px_file(project_root):
+    """Finds the 'px' file within the project directory."""
+    logger.info(f"Searching for 'px' file starting from: {project_root}")
+    for root, _, files in os.walk(project_root):
+        if "px" in files:
+            px_path = os.path.join(root, "px")
+            logger.info(f"Found 'px' file at: {px_path}")
+            return px_path
+    logger.error(f"The file 'px' was not found in the project directory: {project_root}")
+    return None
+
 def check_base_url():
+    """Checks if the base URL's JavaScript files or APIs have changed."""
     base_url = "https://app.notpx.app/"
     main_js_formats = get_main_js_format(base_url)
 
-    if main_js_formats:
-        if settings.ADVANCED_ANTI_DETECTION:
-            # Using ./px to read the file
-            try:
-                current_dir = os.path.dirname(__file__)  # Get the script's directory
-                file_path = os.path.join(current_dir, "px")  # File "px" must be in the same directory
-
-                with open(file_path, "r") as file:
-                    js_ver = file.read().strip()
-                
-                for js in main_js_formats:
-                    if js_ver in js:
-                        logger.success(f"<green>No change in js file: {js_ver}</green>")
-                        return True
-                return False
-            except FileNotFoundError:
-                logger.warning("The file 'px' was not found in the current directory.")
-                return False
-        else:
-            for format in main_js_formats:
-                logger.info(f"Trying format: {format}")
-                full_url = f"https://app.notpx.app{format}"
-                result = get_base_api(full_url)
-                if result is None:
-                    return False
-
-                if baseUrl in result:
-                    logger.success("<green>No change in api!</green>")
-                    return True
-                return False
-            else:
-                logger.warning("Could not find 'baseURL' in any of the JS files.")
-                return False
-    else:
-        logger.info("Could not find any main.js format. Dumping page content for inspection:")
+    if not main_js_formats:
+        logger.info("No main.js formats found. Attempting to inspect base URL content.")
         try:
             response = requests.get(base_url)
-            print(response.text[:1000])  # Print first 1000 characters of the page
-            return False
+            print(response.text[:1000])  # Print a snippet of the page for debugging
         except requests.RequestException as e:
-            logger.warning(f"Error fetching the base URL for content dump: {e}")
-            return False
+            logger.warning(f"Error fetching base URL content: {e}")
+        return False
+
+    if settings.ADVANCED_ANTI_DETECTION:
+        try:
+            project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+            px_path = find_px_file(project_root)
+            if not px_path:
+                return False
+
+            with open(px_path, "r") as file:
+                js_ver = file.read().strip()
+                logger.info(f"Read version from 'px': {js_ver}")
+
+            if any(js_ver in js for js in main_js_formats):
+                logger.success(f"<green>No changes detected in js file: {js_ver}</green>")
+                return True
+
+            logger.warning("Version in 'px' does not match any detected JS files.")
+        except FileNotFoundError:
+            logger.error("The 'px' file was not found.")
+        except Exception as e:
+            logger.error(f"Unexpected error reading 'px': {e}")
+        return False
+    else:
+        for js_format in main_js_formats:
+            full_url = f"https://app.notpx.app{js_format}"
+            if get_base_api(full_url):
+                logger.success("<green>No changes detected in API!</green>")
+                return True
+        logger.warning("No matching baseURL detected in JavaScript files.")
+        return False
