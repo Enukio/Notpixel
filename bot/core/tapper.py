@@ -4,6 +4,7 @@ import random
 from itertools import cycle
 from urllib.parse import unquote
 
+
 import aiohttp
 import requests
 from aiocfscrape import CloudflareScraper
