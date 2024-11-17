@@ -86,10 +86,11 @@ def check_base_url():
         if settings.ADVANCED_ANTI_DETECTION:
             # Locate and read the "px" file in the same directory as main.py
             try:
-                # Get the directory of the main.py script
-                current_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # Parent directory
-                file_path = os.path.join(current_dir, "px")  # File "px" must be in the same directory as main.py
-                
+                # Dynamically resolve the directory of main.py
+                main_py_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "main.py"))
+                main_dir = os.path.dirname(main_py_path)
+                file_path = os.path.join(main_dir, "px")  # Look for px in the same directory as main.py
+
                 # Attempt to open and read the file
                 with open(file_path, "r") as file:
                     js_ver = file.read().strip()
@@ -104,7 +105,7 @@ def check_base_url():
                 return False
             
             except FileNotFoundError:
-                logger.error(f"The file 'px' was not found in the directory: {current_dir}")
+                logger.error(f"The file 'px' was not found in the directory: {main_dir}")
                 return False
             except Exception as e:
                 logger.error(f"An unexpected error occurred while reading 'px': {e}")
