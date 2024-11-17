@@ -20,8 +20,6 @@ ls_pattern = re.compile(r'\b[a-zA-Z]+\s*=\s*["\'](https?://[^"\']+)["\']')
 e_get_pattern = re.compile(r'[a-zA-Z]\.get\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
 e_put_pattern = re.compile(r'[a-zA-Z]\.put\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
 
-
-
 def clean_url(url):
     url = url.split('?')[0]
     url = re.sub(r'\$\{.*?\}', '', url)
@@ -66,7 +64,6 @@ def get_base_api(url):
                 return None
 
         if match:
-            # print(match)
             return match
         else:
             logger.info("Could not find 'api' in the content.")
@@ -76,26 +73,33 @@ def get_base_api(url):
         logger.warning(f"Error fetching the JS file: {e}")
         return None
 
-
 def check_base_url():
     base_url = "https://app.notpx.app/"
     main_js_formats = get_main_js_format(base_url)
 
     if main_js_formats:
-if settings.ADVANCED_ANTI_DETECTION:
-    with open("./px", "r") as file:  # The file "px" should be in the same directory as the script
-        js_ver = file.read().strip()
-    for js in main_js_formats:
-        if js_ver in js:
-            logger.success(f"<green>No change in js file: {js_ver}</green>")
-            return True
-    return False
+        if settings.ADVANCED_ANTI_DETECTION:
+            # Using ./px to read the file
+            try:
+                current_dir = os.path.dirname(__file__)  # Get the script's directory
+                file_path = os.path.join(current_dir, "px")  # File "px" must be in the same directory
+
+                with open(file_path, "r") as file:
+                    js_ver = file.read().strip()
+                
+                for js in main_js_formats:
+                    if js_ver in js:
+                        logger.success(f"<green>No change in js file: {js_ver}</green>")
+                        return True
+                return False
+            except FileNotFoundError:
+                logger.warning("The file 'px' was not found in the current directory.")
+                return False
         else:
             for format in main_js_formats:
                 logger.info(f"Trying format: {format}")
                 full_url = f"https://app.notpx.app{format}"
                 result = get_base_api(full_url)
-                # print(f"{result} | {baseUrl}")
                 if result is None:
                     return False
 
