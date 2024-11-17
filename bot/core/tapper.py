@@ -152,8 +152,12 @@ class Tapper:
             tg_web_data = unquote(string=auth_url.split('tgWebAppData=')[1].split('&tgWebAppVersion')[0])
 
             tg_web_data_decoded = unquote(unquote(tg_web_data))
-            tg_web_data_json = tg_web_data_decoded.split('user=')[1].split('&chat_instance')[0]
-            user_data = json.loads(tg_web_data_json)
+tg_web_data_json = tg_web_data_decoded.split('user=')[1].split('&chat_instance')[0]
+try:
+    user_data = json.loads(tg_web_data_json)
+except json.JSONDecodeError as e:
+    logger.error(f"Failed to decode JSON: {tg_web_data_json}")
+    raise
             self.user_id = user_data['id']
 
             if self.tg_client.is_connected:
@@ -196,15 +200,21 @@ class Tapper:
         except:
             return False
 
-    def login(self, session):
-        response = session.get(f"{API_GAME_ENDPOINT}/users/me", headers=headers)
-        if response.status_code == 200:
-            logger.success(f"{self.session_name} | <green>Logged in.</green>")
-            return True
-        else:
-            print(response.json())
-            logger.warning("{self.session_name} | <red>Failed to login</red>")
-            return False
+def login(self, session):
+    response = session.get(f"{API_GAME_ENDPOINT}/users/me", headers=headers)
+    if response.status_code == 200:
+        logger.success(f"{self.session_name} | <green>Logged in.</green>")
+        return True
+    else:
+        try:
+            # Attempt to decode JSON response if available
+            error_response = response.json()
+            logger.warning(f"{self.session_name} | Failed to login: {error_response}")
+        except json.JSONDecodeError:
+            # Handle cases where the response is not JSON
+            logger.error(f"{self.session_name} | Failed to login: Unexpected response: {response.text}")
+        return False
+
 
     def get_user_data(self, session):
         response = session.get(f"{API_GAME_ENDPOINT}/mining/status", headers=headers)
