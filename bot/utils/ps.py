@@ -84,11 +84,11 @@ def check_base_url():
 
     if main_js_formats:
         if settings.ADVANCED_ANTI_DETECTION:
-            # Locate and read the "px" file
+            # Locate and read the "px" file in the same directory as main.py
             try:
-                # Get the directory of the current script
-                current_dir = os.path.dirname(__file__)  
-                file_path = os.path.join(current_dir, "px")  # File "px" must be in the same directory
+                # Get the directory of the main.py script
+                current_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # Parent directory
+                file_path = os.path.join(current_dir, "px")  # File "px" must be in the same directory as main.py
                 
                 # Attempt to open and read the file
                 with open(file_path, "r") as file:
