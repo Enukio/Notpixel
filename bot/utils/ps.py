@@ -85,15 +85,15 @@ def check_base_url():
     if main_js_formats:
         if settings.ADVANCED_ANTI_DETECTION:
             try:
-                # Dynamically resolve the directory of main.py
-                current_dir = os.path.dirname(__file__)  # Current script's directory
-                main_py_dir = os.path.abspath(os.path.join(current_dir, ".."))  # Parent directory (main.py's directory)
-                px_path = os.path.join(main_py_dir, "px")  # File "px" should be here
-
-                # Debugging: Log resolved paths
+                # Dynamically resolve the main.py directory
+                current_dir = os.path.dirname(__file__)
                 logger.info(f"Current script directory: {current_dir}")
-                logger.info(f"Resolved main.py directory: {main_py_dir}")
-                logger.info(f"Looking for 'px' in: {px_path}")
+
+                main_py_dir = os.path.abspath(os.path.join(current_dir, ".."))
+                logger.info(f"Main.py directory: {main_py_dir}")
+
+                px_path = os.path.join(main_py_dir, "px")
+                logger.info(f"Resolved px path: {px_path}")
 
                 # Attempt to open and read the file
                 with open(px_path, "r") as file:
