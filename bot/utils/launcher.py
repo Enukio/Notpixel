@@ -5,16 +5,18 @@ import asyncio
 import argparse
 import sys
 from urllib.parse import unquote
+
 from aiofile import AIOFile
 from pyrogram import Client
 from better_proxy import Proxy
+
 from bot.config import settings
 from bot.core.agents import generate_random_user_agent
 from bot.utils import logger
 from bot.core.tapper import run_tapper, run_tapper1
 from bot.core.query import run_query_tapper, run_query_tapper1
 from bot.core.registrator import register_sessions
-import subprocess  # Digunakan untuk menjalankan idx.py
+
 
 start_text = """
 ███████╗███╗░░██╗██╗░░░██╗██╗░░██╗██╗░█████╗░
@@ -34,11 +36,13 @@ Select an action:
 global tg_clients
 
 
+
 def get_session_names() -> list[str]:
     session_names = sorted(glob.glob("sessions/*.session"))
     session_names = [
         os.path.splitext(os.path.basename(file))[0] for file in session_names
     ]
+
     return session_names
 
 
@@ -48,14 +52,18 @@ def get_proxies() -> list[Proxy]:
             proxies = [Proxy.from_str(proxy=row.strip()).as_url for row in file]
     else:
         proxies = []
+
     return proxies
 
 
 async def get_tg_clients() -> list[Client]:
     global tg_clients
+
     session_names = get_session_names()
+
     if not session_names:
         raise FileNotFoundError("Not found session files")
+
     if not settings.API_ID or not settings.API_HASH:
         raise ValueError("API_ID and API_HASH not found in the .env file.")
 
@@ -69,8 +77,8 @@ async def get_tg_clients() -> list[Client]:
         )
         for session_name in session_names
     ]
-    return tg_clients
 
+    return tg_clients
 
 def fetch_username(query):
     try:
@@ -88,9 +96,8 @@ def fetch_username(query):
                 json_data = json.loads(fetch_data)
                 return json_data['username']
             except:
-                logger.warning(f"Invalid query: {query}")
+                logger.warning(f"Invaild query: {query}")
                 sys.exit()
-
 
 async def get_user_agent(session_name):
     async with AIOFile('user_agents.json', 'r') as file:
@@ -109,6 +116,33 @@ async def get_user_agent(session_name):
         logger.info(f"{session_name} | Loading user agent from cache...")
         return user_agents[session_name]
 
+def get_un_used_proxy(used_proxies: list[Proxy]):
+    proxies = get_proxies()
+    for proxy in proxies:
+        if proxy not in used_proxies:
+            return proxy
+    return None
+
+async def get_proxy(session_name):
+    if settings.USE_PROXY_FROM_FILE:
+        async with AIOFile('proxy.json', 'r') as file:
+            content = await file.read()
+            proxies = json.loads(content)
+
+        if session_name not in list(proxies.keys()):
+            logger.info(f"{session_name} | Doesn't bind with any proxy, binding to a new proxy...")
+            used_proxies = [proxy for proxy in proxies.values()]
+            proxy = get_un_used_proxy(used_proxies)
+            proxies.update({session_name: proxy})
+            async with AIOFile('proxy.json', 'w') as file:
+                content = json.dumps(proxies, indent=4)
+                await file.write(content)
+            return proxy
+        else:
+            logger.info(f"{session_name} | Loading proxy from cache...")
+            return proxies[session_name]
+    else:
+        return None
 
 async def process() -> None:
     parser = argparse.ArgumentParser()
@@ -126,12 +160,14 @@ async def process() -> None:
 
     if not action:
         print(start_text)
+
         while True:
             action = input("> ")
+
             if not action.isdigit():
                 logger.warning("Action must be number")
-            elif action not in ["1", "2", "3", "4"]:
-                logger.warning("Action must be 1, 2, 3, or 4")
+            elif action not in ["1", "2", "3"]:
+                logger.warning("Action must be 1, 2 or 3")
             else:
                 action = int(action)
                 break
@@ -146,8 +182,10 @@ async def process() -> None:
                     logger.warning("Answer must be y or n")
                 else:
                     break
+
         if ans == "y":
             tg_clients = await get_tg_clients()
+
             await run_tasks(tg_clients=tg_clients)
         else:
             tg_clients = await get_tg_clients()
@@ -163,35 +201,27 @@ async def process() -> None:
         if ans == "y":
             with open("data.txt", "r") as f:
                 query_ids = [line.strip() for line in f.readlines()]
+
             await run_tasks_query(query_ids)
         else:
             with open("data.txt", "r") as f:
                 query_ids = [line.strip() for line in f.readlines()]
-            await run_query_tapper1(query_ids)
-    elif action == 4:
-        # Menjalankan idx.py di dua tingkat atas
-        two_up_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-        idx_path = os.path.join(two_up_path, "idx.py")
-        if os.path.exists(idx_path):
-            subprocess.run(["python", idx_path])
-        else:
-            logger.error(f"File idx.py tidak ditemukan di path: {idx_path}")
 
+            await run_query_tapper1(query_ids)
 
 async def run_tasks_query(query_ids: list[str]):
     tasks = [
         asyncio.create_task(
             run_query_tapper(
-                query=query,
+                query=query, 
                 proxy=await get_proxy(fetch_username(query)),
                 ua=await get_user_agent(fetch_username(query))
             )
         )
         for query in query_ids
     ]
+
     await asyncio.gather(*tasks)
-
-
 async def run_tasks(tg_clients: list[Client]):
     tasks = [
         asyncio.create_task(
@@ -203,4 +233,5 @@ async def run_tasks(tg_clients: list[Client]):
         )
         for tg_client in tg_clients
     ]
+
     await asyncio.gather(*tasks)
