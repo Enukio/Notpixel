@@ -152,12 +152,20 @@ class Tapper:
             tg_web_data = unquote(string=auth_url.split('tgWebAppData=')[1].split('&tgWebAppVersion')[0])
 
             tg_web_data_decoded = unquote(unquote(tg_web_data))
-tg_web_data_json = tg_web_data_decoded.split('user=')[1].split('&chat_instance')[0]
-try:
-    user_data = json.loads(tg_web_data_json)
-except json.JSONDecodeError as e:
-    logger.error(f"Failed to decode JSON: {tg_web_data_json} | Error: {e}")
-    raise
+        # Try-except untuk parsing JSON
+        try:
+            tg_web_data_json = tg_web_data_decoded.split('user=')[1].split('&chat_instance')[0]
+            user_data = json.loads(tg_web_data_json)
+            self.user_id = user_data['id']
+        except (IndexError, json.JSONDecodeError) as e:
+            logger.error(f"Error processing tg_web_data_json: {tg_web_data_json} | Error: {e}")
+            raise
+
+        return tg_web_data
+    except Exception as e:
+        logger.error(f"{self.session_name} | Unknown error during Authorization: {e}")
+        await asyncio.sleep(3)
+        raise
 
             self.user_id = user_data['id']
 
