@@ -18,17 +18,17 @@ class ColorFormatter(logging.Formatter):
             'CRITICAL': Fore.RED + Style.BRIGHT  # CRITICAL: Bright Red
         }.get(record.levelname, Fore.WHITE)  # Default to white
 
-        # Add color to the log level and "[Enukio]"
+        # Add color to the log level and "[Not pixel]"
         record.levelname = f"{level_color}{record.levelname}{Style.RESET_ALL}"
-        record.enukio = f"{Fore.RED}[Enukio]{Style.RESET_ALL}"  # [Enukio] in red
+        record.notpixel = f"{Fore.RED}[Not pixel]{Style.RESET_ALL}"  # [Not pixel] in red
         record.msg = f"{Style.BRIGHT}{record.msg}{Style.RESET_ALL}"
         return super().format(record)
 
 # Configure logger
-formatter = ColorFormatter('%(enukio)s - %(asctime)s - %(levelname)s - %(message)s', '%Y-%m-%d %H:%M:%S')
+formatter = ColorFormatter('%(notpixel)s - %(asctime)s - %(levelname)s - %(message)s', '%Y-%m-%d %H:%M:%S')
 handler = logging.StreamHandler()
 handler.setFormatter(formatter)
-logger = logging.getLogger('[Enukio]')
+logger = logging.getLogger('[Not pixel]')
 logger.setLevel(logging.INFO)
 logger.addHandler(handler)
 
