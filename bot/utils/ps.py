@@ -107,6 +107,7 @@ def check_base_url():
                 if baseUrl in result:
                     logger.success("<green>No change in API!</green>")
                     return True
+                return False
             else:
                 logger.warning("Could not find 'baseURL' in any of the JS files.")
                 return False
