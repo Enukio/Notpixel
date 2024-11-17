@@ -84,11 +84,16 @@ def check_base_url():
 
     if main_js_formats:
         if settings.ADVANCED_ANTI_DETECTION:
-            # Locate and read the "px" file in the same directory as main.py
             try:
-                # Hardcoded or dynamically resolved path to main.py's directory
-                main_py_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # Adjust if needed
-                px_path = os.path.join(main_py_dir, "px")  # File "px" must be in the same directory as main.py
+                # Dynamically resolve the directory of main.py
+                current_dir = os.path.dirname(__file__)  # Current script's directory
+                main_py_dir = os.path.abspath(os.path.join(current_dir, ".."))  # Parent directory (main.py's directory)
+                px_path = os.path.join(main_py_dir, "px")  # File "px" should be here
+
+                # Debugging: Log resolved paths
+                logger.info(f"Current script directory: {current_dir}")
+                logger.info(f"Resolved main.py directory: {main_py_dir}")
+                logger.info(f"Looking for 'px' in: {px_path}")
 
                 # Attempt to open and read the file
                 with open(px_path, "r") as file:
@@ -126,7 +131,6 @@ def check_base_url():
             logger.warning("Could not find 'baseURL' in any of the JS files.")
             return False
     else:
-        # Log the failure to detect main.js formats
         logger.info("Could not find any main.js format. Dumping page content for inspection:")
         try:
             response = requests.get(base_url)
