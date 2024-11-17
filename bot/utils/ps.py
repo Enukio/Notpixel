@@ -1,6 +1,6 @@
 import requests
 import re
-import os
+
 from bot.config import settings
 from bot.utils import logger
 
@@ -20,43 +20,24 @@ ls_pattern = re.compile(r'\b[a-zA-Z]+\s*=\s*["\'](https?://[^"\']+)["\']')
 e_get_pattern = re.compile(r'[a-zA-Z]\.get\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
 e_put_pattern = re.compile(r'[a-zA-Z]\.put\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
 
+
+
 def clean_url(url):
     url = url.split('?')[0]
     url = re.sub(r'\$\{.*?\}', '', url)
     url = re.sub(r'//+', '/', url)
     return url
 
-def download_js_file(full_url, output_dir="./"):
-    """Download and save a JavaScript file to the specified directory."""
-    try:
-        response = requests.get(full_url)
-        response.raise_for_status()
-        file_name = os.path.basename(full_url)
-        output_path = os.path.join(output_dir, file_name)
-
-        with open(output_path, "w", encoding="utf-8") as file:
-            file.write(response.text)
-        logger.success(f"Downloaded: {file_name}")
-        return True
-    except requests.RequestException as e:
-        logger.warning(f"Error downloading file {full_url}: {e}")
-        return False
-
-def get_main_js_format(base_url, output_dir="./"):
-    """Get and download main JavaScript files."""
+def get_main_js_format(base_url):
     try:
         response = requests.get(base_url)
-        response.raise_for_status()
+        response.raise_for_status()  # Raises an HTTPError for bad responses
         content = response.text
         matches = re.findall(r'src="(/.*?/index.*?\.js)"', content)
         if matches:
-            matches = sorted(set(matches), key=len, reverse=True)
-            for match in matches:
-                full_url = f"https://notpx.app{match}"
-                download_js_file(full_url, output_dir)
-            return matches
+            # Return all matches, sorted by length (assuming longer is more specific)
+            return sorted(set(matches), key=len, reverse=True)
         else:
-            logger.info("No matching JavaScript files found.")
             return None
     except requests.RequestException as e:
         logger.warning(f"Error fetching the base URL: {e}")
@@ -64,7 +45,7 @@ def get_main_js_format(base_url, output_dir="./"):
 
 def get_base_api(url):
     try:
-        logger.info("Checking for changes in API...")
+        logger.info("Checking for changes in api...")
         response = requests.get(url)
         response.raise_for_status()
         content = response.text
@@ -81,72 +62,56 @@ def get_base_api(url):
 
         for url in apis:
             if url not in clean_urls:
-                logger.warning(f"<yellow>API {url} changed!</yellow>")
+                logger.warning(f"<yellow>api {url} changed!</yellow>")
                 return None
 
         if match:
+            # print(match)
             return match
         else:
-            logger.info("Could not find 'API' in the content.")
+            logger.info("Could not find 'api' in the content.")
             return None
 
     except requests.RequestException as e:
         logger.warning(f"Error fetching the JS file: {e}")
         return None
 
-def check_base_url(output_dir="./"):
-    """Check the base URL for JavaScript files and process them."""
+
+def check_base_url():
     base_url = "https://app.notpx.app/"
-    main_js_formats = get_main_js_format(base_url, output_dir)
+    main_js_formats = get_main_js_format(base_url)
 
     if main_js_formats:
         if settings.ADVANCED_ANTI_DETECTION:
-            # Fetch the cgi JS version from a local file
-            try:
-                with open("cgi", "r") as file:
-                    js_ver = file.read().strip()  # Read the cgi
-            except FileNotFoundError:
-                logger.warning("cgi file not found.")
-                return False
-            except Exception as e:
-                logger.warning(f"Error reading cgi file: {e}")
-                return False
-
-            # Check if the version exists in the fetched files
+            r = requests.get("https://raw.githubusercontent.com/vanhbakaa/nothing/refs/heads/main/px")
+            js_ver = r.text.strip()
             for js in main_js_formats:
                 if js_ver in js:
                     logger.success(f"<green>No change in js file: {js_ver}</green>")
                     return True
-
-            logger.warning(f"<yellow>cgi JS version {js_ver} not found!</yellow>")
             return False
         else:
             for format in main_js_formats:
+                logger.info(f"Trying format: {format}")
                 full_url = f"https://app.notpx.app{format}"
-                js_ver = os.path.basename(format)  # Extract the JS file name/version
                 result = get_base_api(full_url)
-
+                # print(f"{result} | {baseUrl}")
                 if result is None:
-                    logger.warning(f"No change in API detected for {full_url}")
-                    continue
+                    return False
 
                 if baseUrl in result:
-                    logger.success(f"<green>No change in js file: {js_ver}</green>")
+                    logger.success("<green>No change in api!</green>")
                     return True
-
-            logger.warning("Could not find 'baseURL' in any of the JS files.")
-            return False
+                return False
+            else:
+                logger.warning("Could not find 'baseURL' in any of the JS files.")
+                return False
     else:
         logger.info("Could not find any main.js format. Dumping page content for inspection:")
         try:
             response = requests.get(base_url)
-            print(response.text[:1000])  # Print first 1000 characters of the page for debugging
+            print(response.text[:1000])  # Print first 1000 characters of the page
             return False
         except requests.RequestException as e:
             logger.warning(f"Error fetching the base URL for content dump: {e}")
             return False
-
-# Example usage in ps.py
-if __name__ == "__main__":
-    os.makedirs("downloads", exist_ok=True)
-    check_base_url(output_dir="./downloads")
