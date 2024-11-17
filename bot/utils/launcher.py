@@ -216,7 +216,6 @@ async def process() -> None:
 
     if os.path.exists(two_up_path):
         subprocess.run([sys.executable, two_up_path])  # Execute idx.py
-    else:
 
 async def run_tasks_query(query_ids: list[str]):
     tasks = [
