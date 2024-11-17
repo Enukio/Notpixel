@@ -1,6 +1,6 @@
+import os
 import requests
 import re
-import os
 from bot.config import settings
 from bot.utils import logger
 
@@ -16,11 +16,10 @@ apis = [
     "/mining/boost/check/",
     "/mining/task/check/"
 ]
+
 ls_pattern = re.compile(r'\b[a-zA-Z]+\s*=\s*["\'](https?://[^"\']+)["\']')
 e_get_pattern = re.compile(r'[a-zA-Z]\.get\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
 e_put_pattern = re.compile(r'[a-zA-Z]\.put\(\s*["\']([^"\']+)["\']|\(\s*`([^`]+)`\s*\)')
-
-
 
 def clean_url(url):
     url = url.split('?')[0]
@@ -45,7 +44,7 @@ def get_main_js_format(base_url):
 
 def get_base_api(url):
     try:
-        logger.info("Checking for changes in api...")
+        logger.info("Checking for changes in API...")
         response = requests.get(url)
         response.raise_for_status()
         content = response.text
@@ -62,20 +61,18 @@ def get_base_api(url):
 
         for url in apis:
             if url not in clean_urls:
-                logger.warning(f"<yellow>api {url} changed!</yellow>")
+                logger.warning(f"<yellow>API {url} changed!</yellow>")
                 return None
 
         if match:
-            # print(match)
             return match
         else:
-            logger.info("Could not find 'api' in the content.")
+            logger.info("Could not find 'API' in the content.")
             return None
 
     except requests.RequestException as e:
         logger.warning(f"Error fetching the JS file: {e}")
         return None
-
 
 def check_base_url():
     base_url = "https://app.notpx.app/"
@@ -83,38 +80,35 @@ def check_base_url():
 
     if main_js_formats:
         if settings.ADVANCED_ANTI_DETECTION:
-    # Define the path two directories up
-    two_up_path = os.path.join(os.path.dirname(__file__), "../../px")
-    two_up_path = os.path.abspath(two_up_path)
-    try:
-        with open(two_up_path, 'r') as file:
-            js_ver = file.read().strip()
-        main_js_formats = get_main_js_format(base_url)
-        for js in main_js_formats:
-            if js_ver in js:
-                logger.success(f"<green>No change in js file: {js_ver}</green>")
-                return True
-        return False
-    except FileNotFoundError:
-        logger.warning(f"File not found at: {two_up_path}")
-        return False
-    except Exception as e:
-        logger.warning(f"Error reading the file: {e}")
-        return False
-        
+            # Define the path two directories up
+            two_up_path = os.path.join(os.path.dirname(__file__), "../../px")
+            two_up_path = os.path.abspath(two_up_path)
+
+            try:
+                with open(two_up_path, 'r') as file:
+                    js_ver = file.read().strip()
+                for js in main_js_formats:
+                    if js_ver in js:
+                        logger.success(f"<green>No change in JS file: {js_ver}</green>")
+                        return True
+                return False
+            except FileNotFoundError:
+                logger.warning(f"File not found at: {two_up_path}")
+                return False
+            except Exception as e:
+                logger.warning(f"Error reading the file: {e}")
+                return False
         else:
             for format in main_js_formats:
                 logger.info(f"Trying format: {format}")
                 full_url = f"https://app.notpx.app{format}"
                 result = get_base_api(full_url)
-                # print(f"{result} | {baseUrl}")
                 if result is None:
                     return False
 
                 if baseUrl in result:
-                    logger.success("<green>No change in api!</green>")
+                    logger.success("<green>No change in API!</green>")
                     return True
-                return False
             else:
                 logger.warning("Could not find 'baseURL' in any of the JS files.")
                 return False
