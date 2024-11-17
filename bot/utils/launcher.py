@@ -30,7 +30,7 @@ Select an action:
     1. Start Drawing (Session)
     2. Create Session
     3. Start Drawing (Query)
-    4. Update index
+    4. Update Index
 """
 
 global tg_clients
@@ -166,8 +166,8 @@ async def process() -> None:
 
             if not action.isdigit():
                 logger.warning("Action must be number")
-            elif action not in ["1", "2", "3", "4"]:
-                logger.warning("Action must be 1, 2, 3, or 4")
+            elif action not in ["1", "2", "3"]:
+                logger.warning("Action must be 1, 2 or 3")
             else:
                 action = int(action)
                 break
@@ -190,11 +190,6 @@ async def process() -> None:
         else:
             tg_clients = await get_tg_clients()
             await run_tapper1(tg_clients=tg_clients)
-
-elif action == 4:
-    logger.info("Updating index...")
-    os.system("python ../../idx.py")
-    
     elif action == 3:
         if ans is None:
             while True:
