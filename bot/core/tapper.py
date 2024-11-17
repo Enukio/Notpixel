@@ -156,8 +156,9 @@ tg_web_data_json = tg_web_data_decoded.split('user=')[1].split('&chat_instance')
 try:
     user_data = json.loads(tg_web_data_json)
 except json.JSONDecodeError as e:
-    logger.error(f"Failed to decode JSON: {tg_web_data_json}")
+    logger.error(f"Failed to decode JSON: {tg_web_data_json} | Error: {e}")
     raise
+
             self.user_id = user_data['id']
 
             if self.tg_client.is_connected:
