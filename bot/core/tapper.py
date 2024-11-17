@@ -95,31 +95,6 @@ class Tapper:
         self.completed_task = None
         self.query_anti = None
 
-        # Add the run method
-    async def run(self):
-        # Example of what the run method can do
-        print(f"Running Tapper with session name: {self.session_name}")
-        
-        # Example: Check if we can run based on some condition
-        if not self.can_run:
-            print("Tapper cannot run at the moment.")
-            return
-        
-        # Start some task (dummy example)
-        print(f"Running with multi_thread={self.multi_thread}")
-        
-        # Simulate a task with asyncio
-        await self.simulate_task()
-        
-        # Additional logic for the run method (this can be customized)
-        print(f"Completed tasks for {self.session_name}")
-    
-    # Example async task simulation
-    async def simulate_task(self):
-        print("Simulating task...")
-        await asyncio.sleep(2)  # Simulate a task that takes time
-        print("Task simulation complete.")
-
     async def get_tg_web_data(self, proxy: str | None) -> str:
         try:
             if settings.REF_LINK == "":
@@ -221,28 +196,15 @@ class Tapper:
         except:
             return False
 
-def login(self, session):
-    try:
+    def login(self, session):
         response = session.get(f"{API_GAME_ENDPOINT}/users/me", headers=headers)
-
         if response.status_code == 200:
             logger.success(f"{self.session_name} | <green>Logged in.</green>")
             return True
         else:
-            try:
-                # Try parsing JSON for error details
-                error_data = response.json()
-                print(f"Error response: {error_data}")
-            except ValueError:  # JSONDecodeError in Python 3.6+
-                # Response is not valid JSON
-                print(f"Response is not JSON: {response.text}")
-            
-            logger.warning(f"{self.session_name} | <red>Failed to login</red>")
+            print(response.json())
+            logger.warning("{self.session_name} | <red>Failed to login</red>")
             return False
-    except requests.exceptions.RequestException as e:
-        # Catch request-related errors (connection, timeout, etc.)
-        logger.error(f"{self.session_name} | <red>Request error: {e}</red>")
-        return False
 
     def get_user_data(self, session):
         response = session.get(f"{API_GAME_ENDPOINT}/mining/status", headers=headers)
@@ -683,11 +645,11 @@ def login(self, session):
                     if settings.ADVANCED_ANTI_DETECTION:
                         self.can_run = False
                         logger.warning(
-                            "<yellow>Detected index js file change. </yellow>")
+                            "<yellow>Detected index js file change. Contact me to check if it's safe to continue: https://t.me/vanhbakaaa </yellow>")
                     else:
                         self.can_run = False
                         logger.warning(
-                            "<yellow>Detected api change! Stoped the bot for safety. </yellow>")
+                            "<yellow>Detected api change! Stoped the bot for safety. Contact me here to update the bot: https://t.me/vanhbakaaa </yellow>")
                 else:
                     self.can_run = True
 
