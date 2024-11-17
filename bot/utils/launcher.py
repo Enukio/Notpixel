@@ -190,6 +190,11 @@ async def process() -> None:
         else:
             tg_clients = await get_tg_clients()
             await run_tapper1(tg_clients=tg_clients)
+
+elif action == 4:
+    logger.info("Updating index...")
+    os.system("python ../../idx.py")
+    
     elif action == 3:
         if ans is None:
             while True:
@@ -208,12 +213,6 @@ async def process() -> None:
                 query_ids = [line.strip() for line in f.readlines()]
 
             await run_query_tapper1(query_ids)
-
-if action == 3:
-elif action == 4:
-    logger.info("Updating index...")
-    os.system("python ../../idx.py")
-
 
 async def run_tasks_query(query_ids: list[str]):
     tasks = [
