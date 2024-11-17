@@ -87,13 +87,21 @@ def get_main_js_format(base_url, output_file="./px"):
 
 # Main block for execution
 if __name__ == "__main__":
-    # Simulate a progress bar
-    for _ in tqdm(range(100), desc="Initializing script", ascii=True, ncols=75):
-        time.sleep(0.02)  # Simulate initialization delay
+    # Simulate a progress bar for script initialization
+    print(Fore.GREEN + "Starting the script..." + Style.RESET_ALL)
+    for _ in tqdm(range(100), desc="Loading", ascii=True, ncols=75):
+        time.sleep(0.03)  # Simulate some delay
 
-    # Simulate the JavaScript file fetching process
+    # Actual script functionality
     BASE_URL = "https://app.notpx.app"  # Replace with your target URL
-    OUTPUT_FILE = "./px"  # Save all filenames to this px file
-    filenames = get_main_js_format(BASE_URL, OUTPUT_FILE)
-    if not filenames:
-        logger.info("No filenames were saved.")
+    OUTPUT_FILE = "./px"  # Output file for filenames
+    
+    try:
+        logger = logging.getLogger('[Not pixel]')
+        filenames = get_main_js_format(BASE_URL, OUTPUT_FILE)
+        if filenames:
+            logger.info(f"Found and saved {len(filenames)} filenames.")
+        else:
+            logger.info("No filenames were saved.")
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
