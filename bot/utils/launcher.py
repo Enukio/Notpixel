@@ -209,6 +209,7 @@ async def process() -> None:
 
             await run_query_tapper1(query_ids)
 
+if action == 3:
 elif action == 4:
     logger.info("Updating index...")
     os.system("python ../../idx.py")
