@@ -101,15 +101,15 @@ def check_base_url(output_dir="./"):
 
     if main_js_formats:
         if settings.ADVANCED_ANTI_DETECTION:
-            # Fetch the expected JS version from a local file
+            # Fetch the cgi JS version from a local file
             try:
-                with open("expected_version.txt", "r") as file:
-                    js_ver = file.read().strip()  # Read the expected version
+                with open("cgi", "r") as file:
+                    js_ver = file.read().strip()  # Read the cgi
             except FileNotFoundError:
-                logger.warning("Expected version file not found.")
+                logger.warning("cgi file not found.")
                 return False
             except Exception as e:
-                logger.warning(f"Error reading expected version file: {e}")
+                logger.warning(f"Error reading cgi file: {e}")
                 return False
 
             # Check if the version exists in the fetched files
@@ -118,7 +118,7 @@ def check_base_url(output_dir="./"):
                     logger.success(f"<green>No change in js file: {js_ver}</green>")
                     return True
 
-            logger.warning(f"<yellow>Expected JS version {js_ver} not found!</yellow>")
+            logger.warning(f"<yellow>cgi JS version {js_ver} not found!</yellow>")
             return False
         else:
             for format in main_js_formats:
