@@ -4,7 +4,6 @@ import glob
 import asyncio
 import argparse
 import sys
-import subprocess
 from urllib.parse import unquote
 
 from aiofile import AIOFile
@@ -31,7 +30,7 @@ Select an action:
     1. Start Drawing (Session)
     2. Create Session
     3. Start Drawing (Query)
-    4. Update Index
+    4. Update index
 """
 
 global tg_clients
@@ -167,8 +166,8 @@ async def process() -> None:
 
             if not action.isdigit():
                 logger.warning("Action must be number")
-            elif action not in ["1", "2", "3", "4"]:
-                logger.warning("Action must be 1, 2, 3, or 4")
+            elif action not in ["1", "2", "3"]:
+                logger.warning("Action must be 1, 2 or 3")
             else:
                 action = int(action)
                 break
@@ -236,20 +235,3 @@ async def run_tasks(tg_clients: list[Client]):
     ]
 
     await asyncio.gather(*tasks)
-
-def run_idx_script():
-    """
-    Menjalankan script idx.py yang berada dua tingkat di atas direktori ini.
-    """
-    import os
-    idx_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../idx.py")
-    if os.path.exists(idx_path):
-        os.system(f"python {idx_path}")
-    else:
-        logger.error("File idx.py tidak ditemukan di direktori dua tingkat di atas.")
-
-    elif action == 4:
-            if ans is None:
-        run_idx_script()
-            else:
-              break
