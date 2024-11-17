@@ -4,6 +4,7 @@ import glob
 import asyncio
 import argparse
 import sys
+import subprocess
 from urllib.parse import unquote
 
 from aiofile import AIOFile
@@ -248,4 +249,7 @@ def run_idx_script():
         logger.error("File idx.py tidak ditemukan di direktori dua tingkat di atas.")
 
     elif action == 4:
+            if ans is None:
         run_idx_script()
+            else:
+              break
