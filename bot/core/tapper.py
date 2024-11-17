@@ -645,11 +645,11 @@ class Tapper:
                     if settings.ADVANCED_ANTI_DETECTION:
                         self.can_run = False
                         logger.warning(
-                            "<yellow>Detected index js file change. Contact me to check if it's safe to continue: https://t.me/vanhbakaaa </yellow>")
+                            "<yellow>Detected index js file change. </yellow>")
                     else:
                         self.can_run = False
                         logger.warning(
-                            "<yellow>Detected api change! Stoped the bot for safety. Contact me here to update the bot: https://t.me/vanhbakaaa </yellow>")
+                            "<yellow>Detected api change! Stoped the bot for safety. </yellow>")
                 else:
                     self.can_run = True
 
