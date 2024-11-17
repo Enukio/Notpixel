@@ -1,6 +1,6 @@
 import requests
 import re
-
+import os
 from bot.config import settings
 from bot.utils import logger
 
@@ -83,13 +83,26 @@ def check_base_url():
 
     if main_js_formats:
         if settings.ADVANCED_ANTI_DETECTION:
-            r = requests.get("https://raw.githubusercontent.com/vanhbakaa/nothing/refs/heads/main/px")
-            js_ver = r.text.strip()
-            for js in main_js_formats:
-                if js_ver in js:
+    # Define the path two directories up
+    two_up_path = os.path.join(os.path.dirname(__file__), "../../px")
+    two_up_path = os.path.abspath(two_up_path)
+    try:
+        with open(two_up_path, 'r') as file:
+            js_ver = file.read().strip()
+        main_js_formats = get_main_js_format(base_url)
+        for js in main_js_formats:
+            if js_ver in js:
                     logger.success(f"<green>No change in js file: {js_ver}</green>")
                     return True
             return False
+
+            except FileNotFoundError:
+        logger.warning(f"File not found at: {two_up_path}")
+        return False
+    except Exception as e:
+        logger.warning(f"Error reading the file: {e}")
+        return False
+        
         else:
             for format in main_js_formats:
                 logger.info(f"Trying format: {format}")
