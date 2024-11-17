@@ -5,7 +5,6 @@ import asyncio
 import argparse
 import sys
 import subprocess
-from tqdm import tqdm
 from urllib.parse import unquote
 
 from aiofile import AIOFile
