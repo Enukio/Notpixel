@@ -83,9 +83,9 @@ def check_base_url():
 
     if main_js_formats:
         if settings.ADVANCED_ANTI_DETECTION:
-            r = requests.get("https://raw.githubusercontent.com/Enukio/Notpixel/refs/heads/main/px")
-            js_ver = r.text.strip()
-            for js in main_js_formats:
+    with open("px", "r") as file:  # Replace with the actual file path
+        js_ver = file.read().strip()
+        for js in main_js_formats:
                 if js_ver in js:
                     logger.success(f"<green>No change in js file: {js_ver}</green>")
                     return True
