@@ -210,12 +210,13 @@ async def process() -> None:
 
             await run_query_tapper1(query_ids)
 
-elif action == 4:
-    # Path to idx.py two levels above the current directory
-    two_up_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../idx.py"))
+    elif action == 4:
+        # Path to idx.py two levels above the current directory
+        two_up_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../idx.py"))
 
     if os.path.exists(two_up_path):
         subprocess.run([sys.executable, two_up_path])  # Execute idx.py
+    else:
 
 async def run_tasks_query(query_ids: list[str]):
     tasks = [
