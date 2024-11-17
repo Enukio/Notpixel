@@ -196,15 +196,20 @@ class Tapper:
         except:
             return False
 
-    def login(self, session):
-        response = session.get(f"{API_GAME_ENDPOINT}/users/me", headers=headers)
-        if response.status_code == 200:
-            logger.success(f"{self.session_name} | <green>Logged in.</green>")
-            return True
-        else:
-            print(response.json())
-            logger.warning("{self.session_name} | <red>Failed to login</red>")
-            return False
+def login(self, session):
+    response = session.get(f"{API_GAME_ENDPOINT}/users/me", headers=headers)
+    if response.status_code == 200:
+        logger.success(f"{self.session_name} | <green>Logged in.</green>")
+        return True
+    else:
+        print("Response content:", response.text)  # Inspect raw response content
+        try:
+            print("Attempting to parse JSON response...")
+            print(response.json())  # Attempt to parse JSON if possible
+        except requests.exceptions.JSONDecodeError:
+            print("Failed to decode JSON response.")
+        logger.warning(f"{self.session_name} | <red>Failed to login</red>")
+        return False
 
     def get_user_data(self, session):
         response = session.get(f"{API_GAME_ENDPOINT}/mining/status", headers=headers)
