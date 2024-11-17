@@ -1,6 +1,5 @@
 import os
 import re
-
 from bot.config import settings
 from bot.utils import logger
 
@@ -28,26 +27,33 @@ def clean_url(url):
 
 def get_main_js_format(base_url):
     try:
-        # Replace with reading from file logic if necessary, else keep this as-is.
-        response = requests.get(base_url)
-        response.raise_for_status()  # Raises an HTTPError for bad responses
-        content = response.text
+        # Simulate fetching from file system for main.js content
+        file_path = os.path.join(os.path.dirname(__file__), "../../main_js.html")
+        file_path = os.path.abspath(file_path)
+
+        with open(file_path, "r") as file:
+            content = file.read()
+
         matches = re.findall(r'src="(/.*?/index.*?\.js)"', content)
         if matches:
-            # Return all matches, sorted by length (assuming longer is more specific)
             return sorted(set(matches), key=len, reverse=True)
         else:
             return None
-    except requests.RequestException as e:
-        logger.warning(f"Error fetching the base URL: {e}")
+    except FileNotFoundError as e:
+        logger.warning(f"File not found for main.js content: {e}")
         return None
 
 def get_base_api(url):
     try:
         logger.info("Checking for changes in api...")
-        response = requests.get(url)
-        response.raise_for_status()
-        content = response.text
+
+        # Simulate fetching API content from a file
+        file_path = os.path.join(os.path.dirname(__file__), "../../api_content.txt")
+        file_path = os.path.abspath(file_path)
+
+        with open(file_path, "r") as file:
+            content = file.read()
+
         match = ls_pattern.findall(content)
         e_get_urls = e_get_pattern.findall(content)
         e_put_urls = e_put_pattern.findall(content)
@@ -70,8 +76,8 @@ def get_base_api(url):
             logger.info("Could not find 'api' in the content.")
             return None
 
-    except requests.RequestException as e:
-        logger.warning(f"Error fetching the JS file: {e}")
+    except FileNotFoundError as e:
+        logger.warning(f"File not found for API content: {e}")
         return None
 
 def check_base_url():
@@ -99,6 +105,7 @@ def check_base_url():
         else:
             for format in main_js_formats:
                 logger.info(f"Trying format: {format}")
+                # Simulate the URL fetching logic
                 full_url = f"https://app.notpx.app{format}"
                 result = get_base_api(full_url)
                 if result is None:
@@ -111,11 +118,5 @@ def check_base_url():
                 logger.warning("Could not find 'baseURL' in any of the JS files.")
                 return False
     else:
-        logger.info("Could not find any main.js format. Dumping page content for inspection:")
-        try:
-            response = requests.get(base_url)
-            print(response.text[:1000])  # Print first 1000 characters of the page
-            return False
-        except requests.RequestException as e:
-            logger.warning(f"Error fetching the base URL for content dump: {e}")
-            return False
+        logger.info("Could not find any main.js format.")
+        return False
