@@ -209,13 +209,10 @@ async def process() -> None:
 
             await run_query_tapper1(query_ids)
 
-    elif action == 4:
-                if ans is None:
-        # Perintah untuk menjalankan idx.py
+elif action == 4:
     logger.info("Updating index...")
     os.system("python ../../idx.py")
-                else:
-                    break
+
 
 async def run_tasks_query(query_ids: list[str]):
     tasks = [
