@@ -209,7 +209,6 @@ else:
     logger.warning(f"{self.session_name} | Login failed. Status code: {response.status_code}, Content: {response.text}")
 return False
 
-
     def get_user_data(self, session):
         response = session.get(f"{API_GAME_ENDPOINT}/mining/status", headers=headers)
         if response.status_code == 200:
