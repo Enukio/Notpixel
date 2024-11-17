@@ -1,10 +1,4 @@
-get(f"{API_GAME_ENDPOINT}/mining/boost/check/energyLimit", headers=headers)
-        if res.status_code == 200:
-            logger.success(f"{self.session_name} | <green>Upgrade energy limit successfully!</green>")
-
-    def claimpx(self, session):
-        res = session.get(f"{API_GAME_ENDPOINT}/mining/claim", headers=headers)
-        if res.status_code == 200:import asyncio
+import asyncio
 import json
 import random
 from itertools import cycle
