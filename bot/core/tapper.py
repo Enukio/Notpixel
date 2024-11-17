@@ -153,13 +153,14 @@ class Tapper:
 
             tg_web_data_decoded = unquote(unquote(tg_web_data))
         # Try-except untuk parsing JSON
-        try:
-            tg_web_data_json = tg_web_data_decoded.split('user=')[1].split('&chat_instance')[0]
-            user_data = json.loads(tg_web_data_json)
-            self.user_id = user_data['id']
-        except (IndexError, json.JSONDecodeError) as e:
-            logger.error(f"Error processing tg_web_data_json: {tg_web_data_json} | Error: {e}")
-            raise
+try:
+    tg_web_data_json = tg_web_data_decoded.split('user=')[1].split('&chat_instance')[0]
+    user_data = json.loads(tg_web_data_json)
+    self.user_id = user_data['id']
+except (IndexError, json.JSONDecodeError) as e:
+    logger.error(f"Error processing tg_web_data_json: {tg_web_data_json} | Error: {e}")
+    raise
+
 
         return tg_web_data
     except Exception as e:
