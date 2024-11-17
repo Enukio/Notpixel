@@ -34,10 +34,10 @@ logger.addHandler(handler)
 
 def save_filename_to_cgi(filenames, output_file):
     """
-    Save the list of JavaScript filenames to a .cgi file.
+    Save the list of JavaScript filenames to a px file.
 
     :param filenames: List of JavaScript filenames to save.
-    :param output_file: Path to the .cgi file where filenames will be saved.
+    :param output_file: Path to the px file where filenames will be saved.
     """
     try:
         with open(output_file, 'w') as f:
@@ -47,12 +47,12 @@ def save_filename_to_cgi(filenames, output_file):
     except Exception as e:
         logger.error(f"Failed to save filenames to {output_file}: {e}")
 
-def get_main_js_format(base_url, output_file="./uhuk"):
+def get_main_js_format(base_url, output_file="./px"):
     """
     Scrape the base page to find JavaScript files matching the pattern and save filenames.
 
     :param base_url: The URL of the webpage to scrape.
-    :param output_file: The file to save the list of JavaScript filenames (as .cgi).
+    :param output_file: The file to save the list of JavaScript filenames (as file).
     :return: A list of filenames or None if no matches are found.
     """
     try:
@@ -73,7 +73,7 @@ def get_main_js_format(base_url, output_file="./uhuk"):
                 filename = os.path.basename(match)
                 filenames.append(filename)
 
-            # Save the filenames to the .cgi file
+            # Save the filenames to the px file
             save_filename_to_cgi(filenames, output_file)
             return filenames
         else:
@@ -87,7 +87,7 @@ def get_main_js_format(base_url, output_file="./uhuk"):
 if __name__ == "__main__":
     # Simulate the JavaScript file fetching process
     BASE_URL = "https://app.notpx.app"  # Replace with your target URL
-    OUTPUT_FILE = "./uhuk"  # Save all filenames to this .cgi file
+    OUTPUT_FILE = "./px"  # Save all filenames to this px file
     filenames = get_main_js_format(BASE_URL, OUTPUT_FILE)
     if not filenames:
         logger.info("No filenames were saved.")
