@@ -211,7 +211,6 @@ async def process() -> None:
 
     elif action == 4:
                 if ans is None:
-            while True:
         # Perintah untuk menjalankan idx.py
     logger.info("Updating index...")
     os.system("python ../../idx.py")
