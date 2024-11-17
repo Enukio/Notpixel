@@ -1,4 +1,10 @@
-import asyncio
+get(f"{API_GAME_ENDPOINT}/mining/boost/check/energyLimit", headers=headers)
+        if res.status_code == 200:
+            logger.success(f"{self.session_name} | <green>Upgrade energy limit successfully!</green>")
+
+    def claimpx(self, session):
+        res = session.get(f"{API_GAME_ENDPOINT}/mining/claim", headers=headers)
+        if res.status_code == 200:import asyncio
 import json
 import random
 from itertools import cycle
@@ -277,25 +283,15 @@ class Tapper:
         if res.status_code == 200:
             logger.success(f"{self.session_name} | <green>Upgrade energy limit successfully!</green>")
 
-def claimpx(self, session):
-    try:
+    def claimpx(self, session):
         res = session.get(f"{API_GAME_ENDPOINT}/mining/claim", headers=headers)
         if res.status_code == 200:
-            response_data = res.json()
-            claimed = response_data.get('claimed', 0)
             logger.success(
-                f"{self.session_name} | Successfully claimed <cyan>{claimed}</cyan> px from mining!"
-            )
-            self.balance += claimed
-        else:
-            logger.warning(
-                f"{self.session_name} | Failed to claim px from mining. Status code: {res.status_code}, Response: {res.text}"
-            )
-    except requests.exceptions.JSONDecodeError:
-        logger.error(f"{self.session_name} | Invalid JSON response from server: {res.text}")
-    except Exception as e:
-        logger.error(f"{self.session_name} | Unexpected error during claimpx: {e}")
+                f"{self.session_name} | Successfully claimed <cyan>{res.json()['claimed']}</cyan> px from mining!")
+            self.balance += res.json()['claimed']
 
+        else:
+            logger.warning(f"{self.session_name} | Failed to claim px from mining: {res.json()}")
 
     async def subscribe_template(self, session, template_id: int):
         for attempt in range(3):
