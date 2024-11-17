@@ -25,7 +25,7 @@ class ColorFormatter(logging.Formatter):
         return super().format(record)
 
 # Configure logger
-formatter = ColorFormatter('%(notpixel)s - %(asctime)s - %(levelname)s - %(message)s', '%Y-%m-%d %H:%M:%S')
+formatter = ColorFormatter('%(notpixel)s | %(asctime)s | %(levelname)s | %(message)s', '%Y-%m-%d %H:%M:%S')
 handler = logging.StreamHandler()
 handler.setFormatter(formatter)
 logger = logging.getLogger('[Not pixel]')
