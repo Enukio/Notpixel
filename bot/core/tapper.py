@@ -212,11 +212,16 @@ def get_user_data(self, session):
         try:
             return response.json()
         except requests.exceptions.JSONDecodeError:
-            logger.error(f"{self.session_name} | Invalid JSON response: {response.text or 'Empty response'}")
+            logger.warning(
+                f"{self.session_name} | Failed to parse JSON response: {response.text or 'Empty response'}"
+            )
             return None
     else:
-        logger.warning(f"{self.session_name} | Failed to fetch user data: {response.status_code}")
+        logger.warning(
+            f"{self.session_name} | Failed to fetch user data. HTTP Status Code: {response.status_code} | Response: {response.text}"
+        )
         return None
+
 
     def generate_random_color(self, color):
         a = random.choice(self.color_list)
