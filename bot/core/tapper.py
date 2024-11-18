@@ -249,7 +249,7 @@ class Tapper:
                 self.balance = int(response.json()['balance'])
         else:
             # print(response.text)
-            logger.warning(f"{self.session_name} | Faled to repaint: {response.status_code}")
+            logger.warning(f"{self.session_name} | Failed to repaint: {response.status_code}")
 
     async def auto_upgrade_paint(self, session):
         if self.user_upgrades['paintReward'] >= self.max_lvl['paintReward']:
@@ -465,7 +465,7 @@ class Tapper:
             self.balance = int(res.json()['balance'])
             return True
         else:
-            logger.warning(f"{self.session_name} | Faled to repaint: {res.status_code}")
+            logger.warning(f"{self.session_name} | Failed to repaint: {res.status_code}")
             return False
 
     async def repaintV5(self, session, template_info):
