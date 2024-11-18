@@ -223,7 +223,7 @@ class Tapper:
     def generate_random_pos(self):
         return randint(1, 1000000)
 
-def repaintV2(self, session, chance_left, i, data, retries=3):
+    def repaintV2(self, session, chance_left, i, data, retries=3):
     for attempt in range(retries):
         if i % 2 == 0:
             payload = {
