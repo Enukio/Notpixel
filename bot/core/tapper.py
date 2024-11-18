@@ -206,9 +206,9 @@ class Tapper:
             logger.warning("{self.session_name} | <red>Failed to login</red>")
             return False
 
-    def get_user_data(self, session):
-        response = session.get(f"{API_GAME_ENDPOINT}/mining/status", headers=headers)
-        if response.status_code == 200:
+def get_user_data(self, session):
+    response = session.get(f"{API_GAME_ENDPOINT}/mining/status", headers=headers)
+    if response.status_code == 200:
         try:
             return response.json()
         except requests.exceptions.JSONDecodeError:
@@ -217,6 +217,7 @@ class Tapper:
     else:
         logger.warning(f"{self.session_name} | Failed to fetch user data: {response.status_code}")
         return None
+
 
     def generate_random_color(self, color):
         a = random.choice(self.color_list)
