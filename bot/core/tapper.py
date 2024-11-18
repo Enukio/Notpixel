@@ -206,13 +206,20 @@ class Tapper:
             logger.warning("{self.session_name} | <red>Failed to login</red>")
             return False
 
-    def get_user_data(self, session):
+def get_user_data(self, session):
+    try:
         response = session.get(f"{API_GAME_ENDPOINT}/mining/status", headers=headers)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            print(response.json())
+        response.raise_for_status()  # Handle HTTP errors (4xx or 5xx)
+        
+        try:
+            return response.json()  # Attempt to parse JSON
+        except json.JSONDecodeError as e:
+            print(f"Error parsing JSON: {e}")
+            print(f"Response content: {response.text}")
             return None
+    except requests.exceptions.RequestException as e:
+        print(f"HTTP Request failed: {e}")
+        return None
 
     def generate_random_color(self, color):
         a = random.choice(self.color_list)
