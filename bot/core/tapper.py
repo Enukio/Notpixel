@@ -278,9 +278,7 @@ class Tapper:
             logger.success(f"{self.session_name} | <green>Upgrade energy limit successfully!</green>")
 
     # MODIFIED FUNCTION: claimpx
-def claimpx(self, session, max_retries=3, delay=5):
-    retries = 0
-    while retries < max_retries:
+    def claimpx(self, session):
         try:
             res = session.get(f"{API_GAME_ENDPOINT}/mining/claim", headers=headers)
             if res.status_code == 200:
@@ -288,9 +286,8 @@ def claimpx(self, session, max_retries=3, delay=5):
                     f"{self.session_name} | Successfully claimed <cyan>{res.json()['claimed']}</cyan> px from mining!"
                 )
                 self.balance += res.json()['claimed']
-                return True  # Berhenti jika klaim berhasil
             else:
-                # Coba baca pesan kesalahan dari respons
+                # Handle JSON parsing errors and log response text
                 try:
                     error_message = res.json()
                 except requests.exceptions.JSONDecodeError:
@@ -298,14 +295,6 @@ def claimpx(self, session, max_retries=3, delay=5):
                 logger.warning(f"{self.session_name} | Failed to claim px from mining: {error_message}")
         except requests.exceptions.RequestException as e:
             logger.error(f"{self.session_name} | HTTP request failed: {e}")
-
-        retries += 1
-        if retries < max_retries:
-            logger.info(f"{self.session_name} | Retrying claim in {delay} seconds... (Attempt {retries}/{max_retries})")
-            time.sleep(delay)  # Tunggu sebelum mencoba ulang
-
-    logger.error(f"{self.session_name} | Max retries reached. Failed to claim px from mining.")
-    return False  # Mengembalikan status klaim gagal setelah semua percobaan habis
 
     async def subscribe_template(self, session, template_id: int):
         for attempt in range(3):
