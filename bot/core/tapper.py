@@ -886,8 +886,9 @@ async def run_tapper1(tg_clients: list[Client]):
     while True:
         for tg_client in tg_clients:
             try:
-                await Tapper(tg_client=tg_client, multi_thread=False).run(
-                    proxy=await lc.get_proxy(tg_client.name), ua=await get_user_agent(tg_client.name))
+await Tapper(tg_client=tg_client, multi_thread=False).run(
+    proxy=await lc.get_proxy(tg_client.name), ua=await get_user_agent(tg_client.name)
+)
             except InvalidSession:
                 logger.error(f"{tg_client.name} | Invalid Session")
 
