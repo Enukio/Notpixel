@@ -266,7 +266,7 @@ class Tapper:
 
     # Log jika semua percobaan gagal
     logger.error(f"{self.session_name} | Failed to repaint after {retries} attempts.")
-    return False
+            return False
 
     async def auto_upgrade_paint(self, session):
         if self.user_upgrades['paintReward'] >= self.max_lvl['paintReward']:
