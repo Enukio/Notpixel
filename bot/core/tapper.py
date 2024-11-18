@@ -209,6 +209,7 @@ class Tapper:
     def get_user_data(self, session):
         response = session.get(f"{API_GAME_ENDPOINT}/mining/status", headers=headers)
         if response.status_code == 200:
+            if response.headers.get("Content-Type", "").startswith("application/json"):
             return response.json()
         else:
             print(response.json())
