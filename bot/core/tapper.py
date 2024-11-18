@@ -205,19 +205,15 @@ class Tapper:
             print(response.json())
             logger.warning("{self.session_name} | <red>Failed to login</red>")
             return False
-            
-def get_user_data(self, session):
-    response = session.get(f"{API_GAME_ENDPOINT}/mining/status", headers=headers)
-    
-    # Check if the response is successful
-    if response.status_code == 200:
-        # Validate if the response contains JSON data
-        if response.headers.get("Content-Type", "").startswith("application/json"):
+
+    def get_user_data(self, session):
+        response = session.get(f"{API_GAME_ENDPOINT}/mining/status", headers=headers)
+        if response.status_code == 200:
             return response.json()
         else:
             print(response.json())
             return None
-        
+
     def generate_random_color(self, color):
         a = random.choice(self.color_list)
         while a == color:
@@ -884,8 +880,7 @@ async def run_tapper1(tg_clients: list[Client]):
         for tg_client in tg_clients:
             try:
                 await Tapper(tg_client=tg_client, multi_thread=False).run(
-                    proxy=await lc.get_proxy(tg_client.name), ua=await get_user_agent(tg_client.name)
-                )
+                    proxy=await lc.get_proxy(tg_client.name), ua=await get_user_agent(tg_client.name))
             except InvalidSession:
                 logger.error(f"{tg_client.name} | Invalid Session")
 
