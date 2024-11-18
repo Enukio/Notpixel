@@ -223,33 +223,50 @@ class Tapper:
     def generate_random_pos(self):
         return randint(1, 1000000)
 
-    def repaintV2(self, session, chance_left, i, data):
+def repaintV2(self, session, chance_left, i, data, retries=3):
+    for attempt in range(retries):
         if i % 2 == 0:
             payload = {
                 "newColor": data[0],
                 "pixelId": data[1]
             }
-
         else:
             data1 = [str(self.generate_random_color(data[0])), int(self.generate_random_pos())]
             payload = {
                 "newColor": data1[0],
                 "pixelId": data[1]
             }
+
         response = session.post(f"{API_GAME_ENDPOINT}/repaint/start", headers=headers, json=payload)
         if response.status_code == 200:
             if i % 2 == 0:
                 logger.success(
-                    f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
+                    f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>"
+                )
                 self.balance = int(response.json()['balance'])
-
             else:
                 logger.success(
-                    f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data1[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
+                    f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data1[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balace: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>"
+                )
                 self.balance = int(response.json()['balance'])
+            return True  # Keluar dari fungsi jika sukses
+        
+        elif response.status_code == 400:
+            # Log kegagalan dan coba ulang
+            logger.warning(f"{self.session_name} | Failed to repaint (attempt {attempt + 1} of {retries}): {response.status_code}")
+            if attempt < retries - 1:
+                logger.info(f"{self.session_name} | Retrying...")
         else:
-            # print(response.text)
-            logger.warning(f"{self.session_name} | Failed to repaint: {response.status_code}")
+            try:
+                error_message = response.json()
+            except requests.exceptions.JSONDecodeError:
+                error_message = response.text or "No content"
+            logger.error(f"{self.session_name} | Unexpected error: {response.status_code}. Error: {error_message}")
+            break  # Jika error lain, keluar dari loop
+
+    # Log jika semua percobaan gagal
+    logger.error(f"{self.session_name} | Failed to repaint after {retries} attempts.")
+    return False
 
     async def auto_upgrade_paint(self, session):
         if self.user_upgrades['paintReward'] >= self.max_lvl['paintReward']:
