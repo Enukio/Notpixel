@@ -206,14 +206,21 @@ class Tapper:
             logger.warning("{self.session_name} | <red>Failed to login</red>")
             return False
             
-    def get_user_data(self, session):
-        response = session.get(f"{API_GAME_ENDPOINT}/mining/status", headers=headers)
-        if response.status_code == 200:
-            if response.headers.get("Content-Type", "").startswith("application/json"):
+def get_user_data(self, session):
+    response = session.get(f"{API_GAME_ENDPOINT}/mining/status", headers=headers)
+    
+    # Check if the response is successful
+    if response.status_code == 200:
+        # Validate if the response contains JSON data
+        if response.headers.get("Content-Type", "").startswith("application/json"):
             return response.json()
         else:
-            print(response.json())
+            print("The response is not in a valid JSON format.")
             return None
+    else:
+        # Log for failed requests
+        print(f"Request failed with status {response.status_code}: {response.text}")
+        return None
         
     def generate_random_color(self, color):
         a = random.choice(self.color_list)
