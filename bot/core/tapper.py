@@ -215,12 +215,8 @@ def get_user_data(self, session):
         if response.headers.get("Content-Type", "").startswith("application/json"):
             return response.json()
         else:
-            print("The response is not in a valid JSON format.")
+            print(response.json())
             return None
-    else:
-        # Log for failed requests
-        print(f"Request failed with status {response.status_code}: {response.text}")
-        return None
         
     def generate_random_color(self, color):
         a = random.choice(self.color_list)
