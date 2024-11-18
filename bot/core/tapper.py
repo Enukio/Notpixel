@@ -277,15 +277,24 @@ class Tapper:
         if res.status_code == 200:
             logger.success(f"{self.session_name} | <green>Upgrade energy limit successfully!</green>")
 
+    # MODIFIED FUNCTION: claimpx
     def claimpx(self, session):
-        res = session.get(f"{API_GAME_ENDPOINT}/mining/claim", headers=headers)
-        if res.status_code == 200:
-            logger.success(
-                f"{self.session_name} | Successfully claimed <cyan>{res.json()['claimed']}</cyan> px from mining!")
-            self.balance += res.json()['claimed']
-
-        else:
-            logger.warning(f"{self.session_name} | Failed to claim px from mining: {res.json()}")
+        try:
+            res = session.get(f"{API_GAME_ENDPOINT}/mining/claim", headers=headers)
+            if res.status_code == 200:
+                logger.success(
+                    f"{self.session_name} | Successfully claimed <cyan>{res.json()['claimed']}</cyan> px from mining!"
+                )
+                self.balance += res.json()['claimed']
+            else:
+                # Handle JSON parsing errors and log response text
+                try:
+                    error_message = res.json()
+                except requests.exceptions.JSONDecodeError:
+                    error_message = res.text or "No content"
+                logger.warning(f"{self.session_name} | Failed to claim px from mining: {error_message}")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"{self.session_name} | HTTP request failed: {e}")
 
     async def subscribe_template(self, session, template_id: int):
         for attempt in range(3):
