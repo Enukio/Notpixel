@@ -207,18 +207,20 @@ class Tapper:
             return False
 
 def get_user_data(self, session):
-    try:
-        response = session.get(f"{API_GAME_ENDPOINT}/mining/status", headers=headers)
-        response.raise_for_status()  # Handle HTTP errors (4xx or 5xx)
-        
-        try:
-            return response.json()  # Attempt to parse JSON
-        except json.JSONDecodeError as e:
-            print(f"Error parsing JSON: {e}")
-            print(f"Response content: {response.text}")
+    url = f"{API_GAME_ENDPOINT}/mining/status"
+    response = session.get(url, headers=headers)
+    
+    # Check if the response is successful
+    if response.status_code == 200:
+        # Check if the response contains JSON data
+        if response.headers.get("Content-Type", "").startswith("application/json"):
+            return response.json()
+        else:
+            print("The response is not in a valid JSON format.")
             return None
-    except requests.exceptions.RequestException as e:
-        print(f"HTTP Request failed: {e}")
+    else:
+        # Log for failed requests
+        print(f"Request failed with status {response.status_code}: {response.text}")
         return None
 
     def generate_random_color(self, color):
