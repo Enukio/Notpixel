@@ -61,7 +61,7 @@ You can download the [**repository**](https://github.com/Enukio/Notpixel) by clo
 git clone https://github.com/Enukio/Notpixel.git
 ```
 ```shell
-cd NotPixels
+cd Notpixel
 ```
 
 Then you can do automatic installation by typing:
