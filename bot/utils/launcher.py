@@ -5,6 +5,7 @@ import asyncio
 import argparse
 import sys
 import subprocess
+from colorama import Fore, Style
 from urllib.parse import unquote
 
 from aiofile import AIOFile
