@@ -59,7 +59,7 @@ def get_main_js_format(base_url, output_file="./px"):
 
         content = response.text
         # Use regex to find JavaScript file paths
-        matches = re.findall(r'src=["\'](.*?\.js)["\']', content)
+        matches = re.findall(r'src="(/.*?/index.*?\.js)"', content)
         if matches:
             logger.info(f"Found {len(matches)} JavaScript files matching the pattern.")
             matches = sorted(set(matches), key=len, reverse=True)  # Remove duplicates and sort
