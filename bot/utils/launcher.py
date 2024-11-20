@@ -28,6 +28,7 @@ start_text = """
 ╚══════╝╚═╝░░╚══╝░╚═════╝░╚═╝░░╚═╝╚═╝░╚════╝░  
 
 Select an action:
+
     1. Start Drawing (Session)
     2. Create Session
     3. Start Drawing (Query)
