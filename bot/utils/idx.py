@@ -96,7 +96,7 @@ BASE_URL = "https://app.notpx.app"  # Replace with the actual URL to test
 OUTPUT_FILE = os.path.join(output_dir, "px")  # Final path to save the file
 
 home_dir = os.path.expanduser("~")
-output_dir = os.path.join(home_dir, "px")  # Saves to ~/px_files
+output_dir = os.path.join(home_dir, "px_files")  # Saves to ~/px_files
 os.makedirs(output_dir, exist_ok=True)
 
 # Let's run the function and capture filenames
