@@ -9,6 +9,9 @@ init(autoreset=True)
 
 # Custom logging formatter with colors
 class ColorFormatter(logging.Formatter):
+    def __init__(self, fmt=None, datefmt=None, name="Not pixel"):
+        super().__init__(fmt, datefmt)
+        self.name = name  # Set custom name
     def format(self, record):
         # Define color styles for log levels
         level_color = {
@@ -18,45 +21,34 @@ class ColorFormatter(logging.Formatter):
             'CRITICAL': Fore.RED + Style.BRIGHT  # CRITICAL: Bright Red
         }.get(record.levelname, Fore.WHITE)  # Default to white
 
-        # Add color to the log level and "[Not pixel]"
+        # Add color to the log level
         record.levelname = f"{level_color}{record.levelname}{Style.RESET_ALL}"
-        record.notpixel = f"{Fore.RED}[Not pixel]{Style.RESET_ALL}"  # [Not pixel] in red
+        record.botname = f"{Fore.RED}[{self.name}]{Style.RESET_ALL}"
         record.msg = f"{Style.BRIGHT}{record.msg}{Style.RESET_ALL}"
         return super().format(record)
 
 # Configure logger
-formatter = ColorFormatter('%(notpixel)s | %(asctime)s | %(levelname)s | %(message)s', '%Y-%m-%d %H:%M:%S')
+formatter = ColorFormatter('%(botname)s | %(asctime)s | %(levelname)s | %(message)s', '%Y-%m-%d %H:%M:%S')
 handler = logging.StreamHandler()
 handler.setFormatter(formatter)
-logger = logging.getLogger('[Not pixel]')
+logger = logging.getLogger('[{self.name}]')
 logger.setLevel(logging.INFO)
 logger.addHandler(handler)
 
-def save_filename_to_cgi(filenames, output_file):
-    """
-    Save the list of JavaScript filenames to a px file.
-
-    :param filenames: List of JavaScript filenames to save.
-    :param output_file: Path to the px file where filenames will be saved.
-    """
+def storage(filenames, output_file):
+    
     try:
         with open(output_file, 'w') as f:
             for filename in filenames:
                 f.write(filename + '\n')  # Write each filename on a new line
-        logger.info(f"Saved {len(filenames)} filenames to {output_file}")
+        logger.info(f"Saved {len(filenames)} filenames to {Fore.GREEN}{output_file}{Style.RESET_ALL} in specific order.")
     except Exception as e:
-        logger.error(f"Failed to save filenames to {output_file}: {e}")
-
+        logger.error(f"Failed to save filenames to {Fore.RED}{output_file}{Style.RESET_ALL}: {Fore.YELLOW}{e}{Style.RESET_ALL}")
+        
 def get_main_js_format(base_url, output_file="./px"):
-    """
-    Scrape the base page to find JavaScript files matching the pattern and save filenames.
-
-    :param base_url: The URL of the webpage to scrape.
-    :param output_file: The file to save the list of JavaScript filenames (as file).
-    :return: A list of filenames or None if no matches are found.
-    """
+    
     try:
-        logger.info(f"Fetching base URL: {base_url}")
+        logger.info(f"Fetching base URL: {Fore.GREEN}{base_url}{Style.RESET_ALL}")
         response = requests.get(base_url, timeout=10)
         response.raise_for_status()
         content = response.text
@@ -73,8 +65,8 @@ def get_main_js_format(base_url, output_file="./px"):
                 filename = os.path.basename(match)
                 filenames.append(filename)
 
-            # Save the filenames to the px file
-            save_filename_to_cgi(filenames, output_file)
+            # Save the filenames to the output file in the specified order
+            storage(filenames, output_file)
             return filenames
         else:
             logger.warning("No matching JavaScript files found.")
@@ -90,4 +82,4 @@ if __name__ == "__main__":
     OUTPUT_FILE = "./px"  # Save all filenames to this px file
     filenames = get_main_js_format(BASE_URL, OUTPUT_FILE)
     if not filenames:
-        logger.info("No filenames were saved.")
+        logger.info(f"{Fore.YELLOW}No filenames were saved.{Style.RESET_ALL}")
