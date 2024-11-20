@@ -155,7 +155,7 @@ cd Notpixel-bot
 ```shell
 cp .env-example .env
 ```
-Edit your API_ID and API_HASH
+Here you must specify your API_ID and API_HASH, the rest is taken by default
 ```shell
 nano .env
 ```
