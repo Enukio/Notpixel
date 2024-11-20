@@ -61,6 +61,8 @@ Before you begin, make sure you have the following installed:
 You can download the [**repository**](https://github.com/Enukio/Notpixel) by cloning it to your system and installing the necessary dependencies:
 ```shell
 git clone https://github.com/Enukio/Notpixel.git
+```
+```shell
 cd NotPixels
 ```
 
@@ -74,38 +76,6 @@ run.bat
 Linux:
 ```shell
 run.sh
-```
-
-# Linux manual installation
-```shell
-python3 -m venv venv
-```
-```shell
-source venv/bin/activate
-```
-```shell
-pip3 install -r requirements.txt
-```
-```shell
-cp .env-example .env
-```
-```shell
-nano .env 
-```
- Here you must specify your API_ID and API_HASH, the rest is taken by default
- ```shell
-python3 main.py
-```
-
-You can also use arguments for quick start, for example:
-```shell
-~/np >>> python3 main.py --action (1/2)
-# Or
-~/np >>> python3 main.py -a (1/2)
-
-# 1 - Start Drawing 🎨️
-# 2 - Create Session 👨‍🎨
-# 3 - Using Query
 ```
 
 # Windows manual installation
@@ -135,15 +105,47 @@ You can also use arguments for quick start, for example:
 # Or
 ~/np >>> python main.py -a (1/2)
 
-# 1 - Start drawing 🎨️
-# 2 - Creates a session 👨‍🎨
+# 1 - Start drawing
+# 2 - Create session
+```
+
+# Linux manual installation
+```shell
+python3 -m venv venv
+```
+```shell
+source venv/bin/activate
+```
+```shell
+pip3 install -r requirements.txt
+```
+```shell
+cp .env-example .env
+```
+```shell
+nano .env 
+```
+ Here you must specify your API_ID and API_HASH, the rest is taken by default
+ ```shell
+python3 main.py
+```
+
+You can also use arguments for quick start, for example:
+```shell
+~/np >>> python3 main.py --action (1/2)
+# Or
+~/np >>> python3 main.py -a (1/2)
+
+# 1 - Start Drawing
+# 2 - Create Session
+# 3 - Using Query
 ```
 
 # Termux manual installation
 ```
 > pkg update && pkg upgrade -y
 > pkg install python rust git -y
-> git clone https://github.com/vanhbakaa/Notpixel-bot.git
+> git clone https://github.com/Enukio/Notpixel.git
 > cd Notpixel-bot
 > cp .env-example .env
 > nano .env
@@ -158,6 +160,6 @@ You can also use arguments for quick start, for example:
 # Or
 ~/Notpixel-bot > python main.py -a (1/2)
 
-# 1 - Run clicker
-# 2 - Creates a session 
+# 1 - Start drawing
+# 2 - Create session
 ```
