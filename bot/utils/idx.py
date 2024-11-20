@@ -47,12 +47,12 @@ def storage(filenames, output_file):
         with open(output_file, 'w') as f:
             for filename in filenames:
                 f.write(filename + '\n')  # Write each filename on a new line
-        logger.info(f"Saved {len(filenames)} filenames to {Fore.GREEN}px{Style.RESET_ALL}.")
+        logger.info(f"Saved {len(filenames)} filenames to {Fore.GREEN}{output_file}{Style.RESET_ALL}.")
     except Exception as e:
         logger.error(f"Failed to save filenames to {Fore.RED}{output_file}{Style.RESET_ALL}: {Fore.YELLOW}{e}{Style.RESET_ALL}")
 
 # Function to fetch JavaScript filenames from a base URL
-def get_main_js_format(base_url, output_file="../../px"):
+def get_main_js_format(base_url, output_file="Notpixel/px"):
 
     try:
         logger.info(f"Fetching base URL: {Fore.GREEN}{base_url}{Style.RESET_ALL}")
@@ -93,11 +93,7 @@ def get_main_js_format(base_url, output_file="../../px"):
 
 # Main block for execution
 BASE_URL = "https://app.notpx.app"  # Replace with the actual URL to test
-OUTPUT_FILE = os.path.join(output_dir, "px")  # Final path to save the file
-
-home_dir = os.path.expanduser("~")
-output_dir = os.path.join(home_dir, "px_files")  # Saves to ~/px_files
-os.makedirs(output_dir, exist_ok=True)
+OUTPUT_FILE = "Notpixel/px"  # Save all filenames to this px file
 
 # Let's run the function and capture filenames
 filenames = get_main_js_format(BASE_URL, OUTPUT_FILE)
