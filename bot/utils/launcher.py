@@ -67,7 +67,8 @@ async def get_tg_clients() -> list[Client]:
         raise FileNotFoundError("Not found session files")
 
     if not settings.API_ID or not settings.API_HASH:
-        raise ValueError("API_ID and API_HASH not found in the .env file.")
+        print(f"{Fore.YELLOW}Warning: API_ID and API_HASH are not properly set. Please check your .env file.{Style.RESET_ALL}")
+        return []
 
     tg_clients = [
         Client(
@@ -212,11 +213,10 @@ async def process() -> None:
             await run_query_tapper1(query_ids)
 
     elif action == 4:
-        # Path to idx.py in the same directory as the current file
         same_dir_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "idx.py"))
 
-    if os.path.exists(same_dir_path):
-        subprocess.run([sys.executable, same_dir_path])  # Execute idx.py
+        if os.path.exists(same_dir_path):
+            subprocess.run([sys.executable, same_dir_path])
 
 async def run_tasks_query(query_ids: list[str]):
     tasks = [
