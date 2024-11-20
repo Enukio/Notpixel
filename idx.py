@@ -90,4 +90,4 @@ filenames = get_main_js_format(BASE_URL, OUTPUT_FILE)
 if not filenames:
     logger.info(f"{Fore.YELLOW}No filenames were saved.{Style.RESET_ALL}")
 else:
-    logger.info(f"Filenames processed: {filenames}")
+    logger.info(f"Filenames processed: {Fore.GREEN}{filenames}{Style.RESET_ALL}")
