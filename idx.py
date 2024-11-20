@@ -3,6 +3,8 @@ import re
 import requests
 import logging
 from colorama import init, Fore, Style
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 # Initialize colorama
 init(autoreset=True)
@@ -37,23 +39,33 @@ logger = logging.getLogger(name)
 logger.setLevel(logging.INFO)
 logger.addHandler(handler)
 
+# Function to save filenames to a file
 def storage(filenames, output_file):
+
     try:
         os.makedirs(os.path.dirname(output_file), exist_ok=True)  # Ensure the directory exists
         with open(output_file, 'w') as f:
             for filename in filenames:
                 f.write(filename + '\n')  # Write each filename on a new line
-        logger.info(f"Saved {len(filenames)} filenames to {Fore.GREEN}{output_file}{Style.RESET_ALL} in specific order.")
+        logger.info(f"Saved {len(filenames)} filenames to {Fore.GREEN}{output_file}{Style.RESET_ALL}.")
     except Exception as e:
         logger.error(f"Failed to save filenames to {Fore.RED}{output_file}{Style.RESET_ALL}: {Fore.YELLOW}{e}{Style.RESET_ALL}")
 
+# Function to fetch JavaScript filenames from a base URL
 def get_main_js_format(base_url, output_file="./px"):
+
     try:
         logger.info(f"Fetching base URL: {Fore.GREEN}{base_url}{Style.RESET_ALL}")
-        response = requests.get(base_url, timeout=10)
+        
+        # Setup session with retry logic
+        session = requests.Session()
+        retries = Retry(total=3, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
+        session.mount("https://", HTTPAdapter(max_retries=retries))
+
+        response = session.get(base_url, timeout=10)
         response.raise_for_status()
 
-        if not response.headers.get('Content-Type', '').startswith('text/html'):
+        if not response.headers.get('Content-Type', '').lower().startswith('text/html'):
             logger.error("Unexpected content type. Expected HTML.")
             return None
 
@@ -61,16 +73,15 @@ def get_main_js_format(base_url, output_file="./px"):
         # Use regex to find JavaScript file paths
         matches = re.findall(r'src="(/.*?/index.*?\.js)"', content)
         if matches:
-            logger.info(f"Found {len(matches)} JavaScript files matching the pattern.")
+            logger.info(f"Found {len(matches)} JavaScript files.")
             matches = sorted(set(matches), key=len, reverse=True)  # Remove duplicates and sort
-            filenames = []
+            duplicates_removed = len(matches) - len(set(matches))
+            if duplicates_removed > 0:
+                logger.info(f"Removed {duplicates_removed} duplicate filenames.")
 
-            for match in matches:
-                # Extract the filename with .js extension
-                filename = os.path.basename(match)
-                filenames.append(filename)
+            filenames = [os.path.basename(match) for match in matches]
 
-            # Save the filenames to the output file in the specified order
+            # Save the filenames to the output file
             storage(filenames, output_file)
             return filenames
         else:
