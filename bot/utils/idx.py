@@ -93,7 +93,11 @@ def get_main_js_format(base_url, output_file="../../px"):
 
 # Main block for execution
 BASE_URL = "https://app.notpx.app"  # Replace with the actual URL to test
-OUTPUT_FILE = "../../px"  # Save all filenames to this px file
+OUTPUT_FILE = os.path.join(output_dir, "px")  # Final path to save the file
+
+home_dir = os.path.expanduser("~")
+output_dir = os.path.join(home_dir, "px")  # Saves to ~/px_files
+os.makedirs(output_dir, exist_ok=True)
 
 # Let's run the function and capture filenames
 filenames = get_main_js_format(BASE_URL, OUTPUT_FILE)
