@@ -99,9 +99,9 @@ python main.py
 
 You can also use arguments for quick start, for example:
 ```shell
-~/np >>> python main.py --action (1/2)
+~/Notpixel >>> python main.py --action (1/2)
 # Or
-~/np >>> python main.py -a (1/2)
+~/Notpixel >>> python main.py -a (1/2)
 
 # 1 - Start drawing
 # 2 - Create session
@@ -123,16 +123,16 @@ cp .env-example .env
 ```shell
 nano .env 
 ```
- Here you must specify your API_ID and API_HASH, the rest is taken by default
- ```shell
+# Here you must specify your API_ID and API_HASH, the rest is taken by default
+```shell
 python3 main.py
 ```
 
 You can also use arguments for quick start, for example:
 ```shell
-~/np >>> python3 main.py --action (1/2)
+~/Notpixel >>> python3 main.py --action (1/2)
 # Or
-~/np >>> python3 main.py -a (1/2)
+~/Notpixel >>> python3 main.py -a (1/2)
 
 # 1 - Start Drawing
 # 2 - Create Session
@@ -154,9 +154,9 @@ You can also use arguments for quick start, for example:
 
 You can also use arguments for quick start, for example:
 ```termux
-~/Notpixel-bot > python main.py --action (1/2)
+~/Notpixel > python main.py --action (1/2)
 # Or
-~/Notpixel-bot > python main.py -a (1/2)
+~/Notpixel > python main.py -a (1/2)
 
 # 1 - Start drawing
 # 2 - Create session
