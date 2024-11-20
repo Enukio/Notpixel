@@ -150,7 +150,7 @@ pkg install python rust git -y
 > git clone https://github.com/Enukio/Notpixel.git
 ```
 ```shell
-cd Notpixel-bot
+cd Notpixel
 ```
 ```shell
 cp .env-example .env
