@@ -89,10 +89,10 @@ pip install -r requirements.txt
 ```shell
 copy .env-example .env
 ```
+Here you must specify your API_ID and API_HASH, the rest is taken by default
 ```shell
 notepad .env
 ```
-# Here you must specify your API_ID and API_HASH, the rest is taken by default
 ```shell
 python main.py
 ```
@@ -120,10 +120,10 @@ pip3 install -r requirements.txt
 ```shell
 cp .env-example .env
 ```
+Here you must specify your API_ID and API_HASH, the rest is taken by default
 ```shell
-nano .env 
+nano .env
 ```
-# Here you must specify your API_ID and API_HASH, the rest is taken by default
 ```shell
 python3 main.py
 ```
@@ -140,16 +140,30 @@ You can also use arguments for quick start, for example:
 ```
 
 # Termux manual installation
+```shell
+pkg update && pkg upgrade -y
 ```
-> pkg update && pkg upgrade -y
-> pkg install python rust git -y
+```shell
+pkg install python rust git -y
+```
+```shell
 > git clone https://github.com/Enukio/Notpixel.git
-> cd Notpixel-bot
-> cp .env-example .env
-> nano .env
-# edit your api_id and api_hash
-> pip install -r requirements.txt
-> python main.py
+```
+```shell
+cd Notpixel-bot
+```
+```shell
+cp .env-example .env
+```
+Edit your API_ID and API_HASH
+```shell
+nano .env
+```
+```shell
+pip install -r requirements.txt
+```
+```shell
+python main.py
 ```
 
 You can also use arguments for quick start, for example:
