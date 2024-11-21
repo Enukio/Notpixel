@@ -208,12 +208,19 @@ class Tapper:
             return False
 
     def get_user_data(self, session):
-        response = session.get(f"{API_GAME_ENDPOINT}/mining/status", headers=headers)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            print(response.json())
+        try:
+            response = session.get(f"{API_GAME_ENDPOINT}/mining/status", headers=headers)
+            if response.status_code == 200:
+                return response.json()
+           else:
+            logger.error(f"{self.session_name} | Failed to get user data: {response.status_code}, Response: {response.text}")
             return None
+    except requests.exceptions.JSONDecodeError:
+        logger.error(f"{self.session_name} | Failed to decode JSON response: {response.text}")
+        return None
+    except requests.exceptions.RequestException as e:
+        logger.error(f"{self.session_name} | HTTP request error: {e}")
+        return None
 
     def generate_random_color(self, color):
         a = random.choice(self.color_list)
