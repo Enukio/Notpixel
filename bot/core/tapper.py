@@ -49,7 +49,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 API_GAME_ENDPOINT = "https://notpx.app/api/v1"
 
 
-class :
+class Tapper:
     def __init__(self, tg_client: Client, multi_thread: bool):
         self.tg_client = tg_client
         self.session_name = tg_client.name
