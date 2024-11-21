@@ -27,13 +27,9 @@ from .headers import headers
 from random import randint
 import urllib3
 import base64
-import html
 import os
 from PIL import Image
-import io
-import traceback
 from bot.utils.ps import check_base_url
-import sys
 import cloudscraper
 from bot.utils import launcher as lc
 
@@ -59,7 +55,7 @@ class Tapper:
         self.auth_token = ""
         self.last_claim = None
         self.last_checkin = None
-        self.balace = 0
+        self.balance = 0
         self.maxtime = 0
         self.fromstart = 0
         self.balance = 0
@@ -252,17 +248,16 @@ class Tapper:
             # print(response.text)
             logger.warning(f"{self.session_name} | Failed to repaint: {response.status_code}")
 
-
-    # Refactored auto-upgrade function
-    async def auto_upgrade(self, session, upgrade_type):
-        if self.user_upgrades[upgrade_type] >= self.max_lvl[upgrade_type]:
-            self.is_max_lvl[upgrade_type] = True
+    async def auto_upgrade_paint(self, session):
+        if self.user_upgrades['paintReward'] >= self.max_lvl['paintReward']:
+            self.is_max_lvl['paintReward'] = True
             return
-        res = session.get(f"{API_GAME_ENDPOINT}/mining/boost/check/{upgrade_type}", headers=headers)
+        res = session.get(f"{API_GAME_ENDPOINT}/mining/boost/check/paintReward", headers=headers)
         if res.status_code == 200:
-            logger.success(f"{self.session_name} | <green>Upgrade {upgrade_type} successfully!</green>")
+            logger.success(f"{self.session_name} | <green>Upgrade paint reward successfully!</green>")
         await asyncio.sleep(random.uniform(2, 4))
-            async def auto_upgrade_recharge_speed(self, session):
+
+    async def auto_upgrade_recharge_speed(self, session):
         if self.user_upgrades['reChargeSpeed'] >= self.max_lvl['reChargeSpeed']:
             self.is_max_lvl['reChargeSpeed'] = True
             return
@@ -285,14 +280,14 @@ class Tapper:
             res = session.get(f"{API_GAME_ENDPOINT}/mining/claim", headers=headers)
             if res.status_code == 200:
                 logger.success(
-                    f"{self.session_name} | Successfully claimed <cyan>{res.json()['claimed']}</cyan> px from mining!"
+                    f"{self.session_name} | Successfully claimed <cyan>{res.json() if res.headers.get("Content-Type") == "application/json" else {}['claimed']}</cyan> px from mining!"
                 )
-                self.balance += res.json()['claimed']
+                self.balance += res.json() if res.headers.get("Content-Type") == "application/json" else {}['claimed']
             else:
                 # Handle JSON parsing errors and log response text
                 try:
-                    error_message = res.json()
-                except requests.exceptions.JSONDecodeError:
+                    error_message = res.json() if res.headers.get("Content-Type") == "application/json" else {}
+                except (requests.exceptions.JSONDecodeError, ValueError):
                     error_message = res.text or "No content"
                     escaped_message = html.escape(error_message)
                 logger.warning(f"{self.session_name} | Failed to claim px from mining: {escaped_message}")
@@ -326,7 +321,7 @@ class Tapper:
                 res = session.get(f'{API_GAME_ENDPOINT}/image/template/my', headers=headers)
 
                 if res.status_code == 200:
-                    return res.json()
+                    return res.json() if res.headers.get("Content-Type") == "application/json" else {}
                 else:
                     return None
             except Exception as e:
@@ -344,7 +339,7 @@ class Tapper:
             try:
                 res = session.get(f'https://notpx.app/api/v1/image/template/my',
                                   headers=headers)
-                data = res.json()
+                data = res.json() if res.headers.get("Content-Type") == "application/json" else {}
 
                 return data
             except Exception as e:
@@ -464,8 +459,8 @@ class Tapper:
                            json=payload)
         if res.status_code == 200:
             logger.success(
-                f"{self.session_name} | <green>Painted <cyan>{pxId}</cyan> successfully new color: <cyan>{color}</cyan> | Earned <light-blue>{round(int(res.json()['balance']) - self.balance)}</light-blue> | Balace: <light-blue>{res.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
-            self.balance = int(res.json()['balance'])
+                f"{self.session_name} | <green>Painted <cyan>{pxId}</cyan> successfully new color: <cyan>{color}</cyan> | Earned <light-blue>{round(int(res.json() if res.headers.get("Content-Type") == "application/json" else {}['balance']) - self.balance)}</light-blue> | Balace: <light-blue>{res.json() if res.headers.get("Content-Type") == "application/json" else {}['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
+            self.balance = int(res.json() if res.headers.get("Content-Type") == "application/json" else {}['balance'])
             return True
         else:
             logger.warning(f"{self.session_name} | Failed to repaint: {res.status_code}")
@@ -768,54 +763,54 @@ class Tapper:
                                 self.completed_task = list(user_data['tasks'].keys())
                                 if "nikolai" not in self.completed_task:
                                     res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/nikolai", headers=headers)
-                                    if res.status_code == 200 and res.json()['nikolai']:
+                                    if res.status_code == 200 and res.json() if res.headers.get("Content-Type") == "application/json" else {}['nikolai']:
                                         logger.success(
                                             f"{self.session_name} | <green>Successfully complete task <cyan>nikolai</cyan>!</green>")
                                 if "pumpkin" not in self.completed_task :
                                     res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/pumpkin", headers=headers)
-                                    if res.status_code == 200 and res.json()['pumpkin']:
+                                    if res.status_code == 200 and res.json() if res.headers.get("Content-Type") == "application/json" else {}['pumpkin']:
                                         logger.success(f"{self.session_name} | <green>Successfully claimed pumpkin!</green>")
 
                                 if "x:notpixel" not in self.completed_task:
                                     res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/x?name=notpixel",
                                                       headers=headers)
-                                    if res.status_code == 200 and res.json()['x:notpixel']:
+                                    if res.status_code == 200 and res.json() if res.headers.get("Content-Type") == "application/json" else {}['x:notpixel']:
                                         logger.success("<green>Task Not pixel on x completed!</green>")
 
                                 if "x:notcoin" not in self.completed_task:
                                     res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/x?name=notcoin",
                                                       headers=headers)
-                                    if res.status_code == 200 and res.json()['x:notcoin']:
+                                    if res.status_code == 200 and res.json() if res.headers.get("Content-Type") == "application/json" else {}['x:notcoin']:
                                         logger.success("<green>Task Not coin on x completed!</green>")
 
                                 if "paint20pixels" not in self.completed_task:
                                     res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/paint20pixels",
                                                       headers=headers)
-                                    if res.status_code == 200 and res.json()['paint20pixels']:
+                                    if res.status_code == 200 and res.json() if res.headers.get("Content-Type") == "application/json" else {}['paint20pixels']:
                                         logger.success("<green>Task paint 20 pixels completed!</green>")
 
                                 if repaints >= 2049 and "leagueBonusPlatinum" not in self.completed_task:
                                     res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusPlatinum",
                                                       headers=headers)
-                                    if res.status_code == 200 and res.json()['leagueBonusPlatinum']:
+                                    if res.status_code == 200 and res.json() if res.headers.get("Content-Type") == "application/json" else {}['leagueBonusPlatinum']:
                                         logger.success(
                                             f"{self.session_name} | <green>Upgraded to Plantium league!</green>")
                                 if repaints >= 129 and "leagueBonusGold" not in self.completed_task:
                                     res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusGold",
                                                       headers=headers)
-                                    if res.status_code == 200 and res.json()['leagueBonusGold']:
+                                    if res.status_code == 200 and res.json() if res.headers.get("Content-Type") == "application/json" else {}['leagueBonusGold']:
                                         logger.success(f"{self.session_name} | <green>Upgraded to Gold league!</green>")
                                 if repaints >= 9 and "leagueBonusSilver" not in self.completed_task:
                                     res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusSilver",
                                                       headers=headers)
-                                    if res.status_code == 200 and res.json()['leagueBonusSilver']:
+                                    if res.status_code == 200 and res.json() if res.headers.get("Content-Type") == "application/json" else {}['leagueBonusSilver']:
                                         logger.success(
                                             f"{self.session_name} | <green>Upgraded to Silver league!</green>")
 
                                 if "leagueBonusBronze" not in self.completed_task:
                                     res = session.get(f"{API_GAME_ENDPOINT}/mining/task/check/leagueBonusBronze",
                                                       headers=headers)
-                                    if res.status_code == 200 and res.json()['leagueBonusBronze']:
+                                    if res.status_code == 200 and res.json() if res.headers.get("Content-Type") == "application/json" else {}['leagueBonusBronze']:
                                         logger.success(f"{self.session_name} | <green>Upgraded to Bronze league!</green>")
 
 
