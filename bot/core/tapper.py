@@ -252,16 +252,17 @@ class Tapper:
             # print(response.text)
             logger.warning(f"{self.session_name} | Failed to repaint: {response.status_code}")
 
-    async def auto_upgrade_paint(self, session):
-        if self.user_upgrades['paintReward'] >= self.max_lvl['paintReward']:
-            self.is_max_lvl['paintReward'] = True
-            return
-        res = session.get(f"{API_GAME_ENDPOINT}/mining/boost/check/paintReward", headers=headers)
-        if res.status_code == 200:
-            logger.success(f"{self.session_name} | <green>Upgrade paint reward successfully!</green>")
-        await asyncio.sleep(random.uniform(2, 4))
 
-    async def auto_upgrade_recharge_speed(self, session):
+    # Refactored auto-upgrade function
+    async def auto_upgrade(self, session, upgrade_type):
+        if self.user_upgrades[upgrade_type] >= self.max_lvl[upgrade_type]:
+            self.is_max_lvl[upgrade_type] = True
+            return
+        res = session.get(f"{API_GAME_ENDPOINT}/mining/boost/check/{upgrade_type}", headers=headers)
+        if res.status_code == 200:
+            logger.success(f"{self.session_name} | <green>Upgrade {upgrade_type} successfully!</green>")
+        await asyncio.sleep(random.uniform(2, 4))
+            async def auto_upgrade_recharge_speed(self, session):
         if self.user_upgrades['reChargeSpeed'] >= self.max_lvl['reChargeSpeed']:
             self.is_max_lvl['reChargeSpeed'] = True
             return
@@ -893,96 +894,3 @@ async def run_tapper1(tg_clients: list[Client]):
         sleep_ = randint(settings.SLEEP_TIME_BETWEEN_EACH_ROUND[0], settings.SLEEP_TIME_BETWEEN_EACH_ROUND[1])
         logger.info(f"<red>Sleep {sleep_}s...</red>")
         await asyncio.sleep(sleep_)
-
-# Improved initialization
-class Tapper:
-    def __init__(self, tg_client: Client, multi_thread: bool):
-        self.tg_client = tg_client
-        self.session_name = tg_client.name or "default_session"
-        self.maxtime = 0
-        self.balance = 0
-        self.multi_thread = multi_thread
-        self.cache = os.path.join(os.getcwd(), "cache")
-        os.makedirs(self.cache, exist_ok=True)  # Ensure cache directory exists
-
-# Updated login with retries
-def login(self, session):
-    for attempt in range(3):
-        try:
-            response = session.get(f"{API_GAME_ENDPOINT}/users/me", headers=headers)
-            response.raise_for_status()
-            logger.success(f"{self.session_name} | Logged in successfully.")
-            return True
-        except requests.exceptions.HTTPError as e:
-            logger.warning(f"{self.session_name} | HTTP error on login (Attempt {attempt+1}): {e}")
-            if attempt < 2:
-                time_module.sleep(2 ** attempt)  # Exponential backoff
-            else:
-                logger.error(f"{self.session_name} | Login failed after retries.")
-        except Exception as e:
-            logger.error(f"{self.session_name} | Unexpected error in login: {e}")
-    return False
-
-# Updated proxy checker with retries
-async def check_proxy(self, http_client: aiohttp.ClientSession, proxy: Proxy):
-    for attempt in range(3):
-        try:
-            response = await http_client.get(url='https://httpbin.org/ip', timeout=aiohttp.ClientTimeout(5))
-            ip = (await response.json()).get('origin')
-            logger.info(f"{self.session_name} | Proxy IP: {ip}")
-            return True
-        except asyncio.TimeoutError:
-            logger.warning(f"{self.session_name} | Proxy timeout (Attempt {attempt+1}). Retrying...")
-        except Exception as error:
-            logger.error(f"{self.session_name} | Proxy error: {error}")
-    logger.error(f"{self.session_name} | Proxy validation failed after retries.")
-    return False
-
-# Updated painting logic
-async def paint(self, session, retries=5):
-    try:
-        stats_json = self.get_user_data(session)
-        if not stats_json:
-            logger.warning(f"{self.session_name} | Failed to fetch user data!")
-            return
-        charges = stats_json.get('charges', 0)
-        self.balance = stats_json.get('userBalance', 0)
-
-        if charges <= 0:
-            logger.info(f"{self.session_name} | No charges left to paint.")
-            return
-
-        for _ in range(charges):
-            try:
-                # Assume get_cords_and_color fetches pixel coordinates and colors
-                q = get_cords_and_color(user_id=self.user_id, template=self.template_to_join)
-                coords = q.get("coords")
-                color = q.get("color")
-                if not coords or not color:
-                    logger.warning(f"{self.session_name} | Invalid pixel data.")
-                    continue
-
-                result = await self.make_paint_request(session, coords, color, delay_start=5, delay_end=10)
-                if not result:
-                    logger.warning(f"{self.session_name} | Paint request failed.")
-                    break
-            except Exception as e:
-                logger.error(f"{self.session_name} | Error during painting: {e}")
-                await asyncio.sleep(5)
-    except Exception as error:
-        logger.error(f"{self.session_name} | Critical error in painting: {error}")
-        if retries > 0:
-            logger.info(f"{self.session_name} | Retrying painting after delay...")
-            await asyncio.sleep(10)
-            await self.paint(session, retries=retries - 1)
-
-# Cleanup and session management improvements
-async def run(self, proxy: str | None, ua: str) -> None:
-    session = cloudscraper.create_scraper()
-    try:
-        await self.paint(session)
-    except Exception as e:
-        logger.error(f"{self.session_name} | Error in run: {e}")
-    finally:
-        session.close()
-        logger.info(f"{self.session_name} | Session closed.")
