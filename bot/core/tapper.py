@@ -903,10 +903,22 @@ async def run_tapper1(tg_clients: list[Client]):
     while True:
         for tg_client in tg_clients:
             try:
-                await Tapper(tg_client=tg_client, multi_thread=False).run(
-                    proxy=await lc.get_proxy(tg_client.name), ua=await get_user_agent(tg_client.name))
+                # Membuat objek Tapper
+                tapper = Tapper(tg_client=tg_client, multi_thread=False)
+                
+                # Mendapatkan proxy dan user agent
+                proxy = await lc.get_proxy(tg_client.name)
+                ua = await get_user_agent(tg_client.name)
+
+                # Memanggil metode run() pada objek Tapper
+                await tapper.run(proxy=proxy, ua=ua)
+                
             except InvalidSession:
+                # Jika sesi tidak valid
                 logger.error(f"{tg_client.name} | Invalid Session")
+            except Exception as e:
+                # Menangani error lainnya
+                logger.error(f"{tg_client.name} | Unexpected error: {e}")
 
             sleep_ = randint(settings.DELAY_EACH_ACCOUNT[0], settings.DELAY_EACH_ACCOUNT[1])
             logger.info(f"Sleep {sleep_}s...")
