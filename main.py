@@ -1,12 +1,12 @@
 import asyncio
 from contextlib import suppress
 
-async def process():
-    return "Process executed successfully!"
+from bot.utils.launcher import process
+
 
 async def main():
-    result = await process()
-    print(result)
+    await process()
+
 
 if __name__ == '__main__':
     with suppress(KeyboardInterrupt):
