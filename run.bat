@@ -49,6 +49,6 @@ python main.py
 if %errorlevel% neq 0 (
     echo Error: main.py exited with code %errorlevel%.
 )
-echo Restarting the program in 2 seconds... Press Ctrl+C to exit.
+echo Restarting the program in 2 seconds...
 timeout /t 2 /nobreak >nul
 goto :loop
