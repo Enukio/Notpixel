@@ -27,6 +27,7 @@ from .headers import headers
 from random import randint
 import urllib3
 import base64
+import html
 import os
 from PIL import Image
 import io
@@ -292,7 +293,8 @@ class Tapper:
                     error_message = res.json()
                 except requests.exceptions.JSONDecodeError:
                     error_message = res.text or "No content"
-                logger.warning(f"{self.session_name} | Failed to claim px from mining: {error_message.replace('<', '\\<').replace('>', '\\>')}")
+                    escaped_message = html.escape(error_message)
+                logger.warning(f"{self.session_name} | Failed to claim px from mining: {escaped_message}")
         except requests.exceptions.RequestException as e:
             logger.error(f"{self.session_name} | HTTP request failed: {e}")
 
