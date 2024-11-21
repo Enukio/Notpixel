@@ -292,7 +292,7 @@ class Tapper:
                     error_message = res.json()
                 except requests.exceptions.JSONDecodeError:
                     error_message = res.text or "No content"
-                logger.warning(f"{self.session_name} | Failed to claim px from mining: {error_message}")
+                logger.warning(f"{self.session_name} | Failed to claim px from mining: {error_message.replace('<', '\\<').replace('>', '\\>')}")
         except requests.exceptions.RequestException as e:
             logger.error(f"{self.session_name} | HTTP request failed: {e}")
 
