@@ -11,7 +11,7 @@ init(autoreset=True)
 
 # Custom logging formatter with colors
 class ColorFormatter(logging.Formatter):
-    def __init__(self, fmt=None, datefmt=None, name="Not pixel"):
+    def __init__(self, fmt=None, datefmt=None, name="Not Pixel"):
         super().__init__(fmt, datefmt)
         self.name = name  # Set custom name
 
@@ -31,7 +31,7 @@ class ColorFormatter(logging.Formatter):
         return super().format(record)
 
 # Configure logger
-name = "Not pixel"
+name = "Not Pixel"
 formatter = ColorFormatter('%(botname)s | %(asctime)s | %(levelname)s | %(message)s', '%Y-%m-%d %H:%M:%S', name)
 handler = logging.StreamHandler()
 handler.setFormatter(formatter)
