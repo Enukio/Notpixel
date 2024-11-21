@@ -207,21 +207,36 @@ class Tapper:
             logger.warning("{self.session_name} | <red>Failed to login</red>")
             return False
 
-    def get_user_data(self, session):
-        try:
-            response = session.get(f"{API_GAME_ENDPOINT}/mining/status", headers=headers)
-            if response.status_code == 200:
-                return response.json()
-           else:
+def get_user_data(self, session):
+    try:
+        # Melakukan request ke server
+        response = session.get(f"{API_GAME_ENDPOINT}/mining/status", headers=headers, verify=False)
+        
+        # Log respons untuk debugging
+        logger.debug(f"{self.session_name} | Server Response: {response.text}")
+        
+        # Periksa apakah status kode adalah 200 (OK)
+        if response.status_code == 200:
+            # Periksa jika respons kosong
+            if not response.text.strip():
+                logger.warning(f"{self.session_name} | Server returned an empty response.")
+                return None
+            
+            # Parse respons JSON
+            return response.json()
+        else:
+            # Jika status bukan 200, log error
             logger.error(f"{self.session_name} | Failed to get user data: {response.status_code}, Response: {response.text}")
             return None
     except requests.exceptions.JSONDecodeError:
+        # Log error jika JSON tidak valid
         logger.error(f"{self.session_name} | Failed to decode JSON response: {response.text}")
         return None
     except requests.exceptions.RequestException as e:
+        # Tangani error koneksi
         logger.error(f"{self.session_name} | HTTP request error: {e}")
         return None
-
+        
     def generate_random_color(self, color):
         a = random.choice(self.color_list)
         while a == color:
