@@ -5,6 +5,6 @@ from loguru import logger
 logger.remove()
 logger.add(sink=sys.stdout, format="<r>[Not Pixel]</r> | <white>{time:YYYY-MM-DD HH:mm:ss}</white>"
                                    " | <level>{level: <8}</level>"
-                                   " | <cyan><b>{line: <4}</b></cyan>"
+                                   " | <cyan><b>{line: <3}</b></cyan>"
                                    " | <white><b>{message}</b></white>")
 logger = logger.opt(colors=True)
