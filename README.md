@@ -147,7 +147,7 @@ pkg update && pkg upgrade -y
 pkg install python rust git -y
 ```
 ```shell
-> git clone https://github.com/Enukio/Notpixel.git
+git clone https://github.com/Enukio/Notpixel.git
 ```
 ```shell
 cd Notpixel
