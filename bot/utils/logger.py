@@ -6,5 +6,5 @@ logger.remove()
 logger.add(sink=sys.stdout, format="<r>[Not Pixel]</r> | <white>{time:YYYY-MM-DD HH:mm:ss}</white>"
                                    " | <level>{level: <7}</level>"
                                    " | <cyan><b>{line: <3}</b></cyan>"
-                                   " | <white><b>{message}</b></white>")
+                                   " - <white><b>{message}</b></white>")
 logger = logger.opt(colors=True)
