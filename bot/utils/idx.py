@@ -45,10 +45,10 @@ logger.addHandler(handler)
 def storage(filenames, output_file):
 
     try:
-        os.makedirs(os.path.dirname(output_file), exist_ok=True)  # Ensure the directory exists
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
         with open(output_file, 'w') as f:
             for filename in filenames:
-                f.write(filename + '\n')  # Write each filename on a new line
+                f.write(filename + '\n')
         logger.info(f"Saved {len(filenames)} filenames to {Fore.GREEN}{output_file}{Style.RESET_ALL}.")
     except Exception as e:
         logger.error(f"Failed to save filenames to {Fore.RED}{output_file}{Style.RESET_ALL}: {Fore.YELLOW}{e}{Style.RESET_ALL}")
@@ -76,7 +76,7 @@ def get_main_js_format(base_url, output_file="./px"):
         matches = re.findall(r'src="(/.*?/index.*?\.js)"', content)
         if matches:
             logger.info(f"Found {len(matches)} JavaScript files.")
-            matches = sorted(set(matches), key=len, reverse=True)  # Remove duplicates and sort
+            matches = sorted(set(matches), key=len, reverse=True)
             duplicates_removed = len(matches) - len(set(matches))
             if duplicates_removed > 0:
                 logger.info(f"Removed {duplicates_removed} duplicate filenames.")
@@ -97,7 +97,6 @@ def get_main_js_format(base_url, output_file="./px"):
 BASE_URL = "https://app.notpx.app"  # Replace with the actual URL to test
 OUTPUT_FILE = "./px"  # Save all filenames to this px file
 
-# Let's run the function and capture filenames
 filenames = get_main_js_format(BASE_URL, OUTPUT_FILE)
 
 if not filenames:
@@ -105,8 +104,10 @@ if not filenames:
 else:
     logger.info(f"Filenames processed: {Fore.GREEN}{filenames}{Style.RESET_ALL}")
 
-python_interpreter = sys.executable
-logger.info(f"Using Python interpreter: {python_interpreter}")
+# Retrieve the Python version
+python_version = platform.python_version()
+logger.info(f"Using Python interpreter: Python {python_version}")
 
+# Return to main.py using the same interpreter
 logger.info("Returning to Menu...")
-os.system(f'"{python_interpreter}" main.py')
+os.system(f'"{sys.executable}" main.py')
