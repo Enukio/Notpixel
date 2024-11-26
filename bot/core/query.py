@@ -165,12 +165,12 @@ class Tapper:
         if response.status_code == 200:
             if i % 2 == 0:
                 logger.success(
-                    f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balance: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
+                    f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> with color: <cyan>{data[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balance: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
                 self.balance = int(response.json()['balance'])
 
             else:
                 logger.success(
-                    f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> successfully new color: <cyan>{data1[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balance: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
+                    f"{self.session_name} | <green>Painted <cyan>{data[1]}</cyan> with color: <cyan>{data1[0]}</cyan> | Earned <light-blue>{int(response.json()['balance']) - self.balance}</light-blue> | Balance: <light-blue>{response.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
                 self.balance = int(response.json()['balance'])
         else:
             # print(response.text)
@@ -377,7 +377,7 @@ class Tapper:
                            json=payload)
         if res.status_code == 200:
             logger.success(
-                f"{self.session_name} | <green>Painted <cyan>{pxId}</cyan> successfully new color: <cyan>{color}</cyan> | Earned <light-blue>{round(int(res.json()['balance']) - self.balance)}</light-blue> | Balance: <light-blue>{res.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
+                f"{self.session_name} | <green>Painted <cyan>{pxId}</cyan> with color: <cyan>{color}</cyan> | Earned <light-blue>{round(int(res.json()['balance']) - self.balance)}</light-blue> | Balance: <light-blue>{res.json()['balance']}</light-blue> | Repaint left: <yellow>{chance_left}</yellow></green>")
             self.balance = int(res.json()['balance'])
             return True
         else:
