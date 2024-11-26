@@ -106,6 +106,6 @@ else:
 
 # Return to main.py using the same interpreter
 print()
-print("======= Returning to Menu =======")
+print("=========== Returning to Menu ===========")
 print()
 os.system(f'"{sys.executable}" main.py')
