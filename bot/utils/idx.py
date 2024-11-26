@@ -105,5 +105,5 @@ else:
     logger.info(f"Filenames processed: {Fore.GREEN}{filenames}{Style.RESET_ALL}")
 
 # Return to main.py using the same interpreter
-logger.info("Returning to Menu...")
+print("===== Returning to Menu =====...")
 os.system(f'"{sys.executable}" main.py')
