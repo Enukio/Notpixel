@@ -1,4 +1,6 @@
 import os
+import sys
+import platform
 import re
 import requests
 import logging
@@ -102,3 +104,9 @@ if not filenames:
     logger.info(f"{Fore.YELLOW}No filenames were saved.{Style.RESET_ALL}")
 else:
     logger.info(f"Filenames processed: {Fore.GREEN}{filenames}{Style.RESET_ALL}")
+
+python_interpreter = sys.executable
+logger.info(f"Using Python interpreter: {python_interpreter}")
+
+logger.info("Returning to Menu...")
+os.system(f'"{python_interpreter}" main.py')
