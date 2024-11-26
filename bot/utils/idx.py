@@ -15,7 +15,7 @@ init(autoreset=True)
 class ColorFormatter(logging.Formatter):
     def __init__(self, fmt=None, datefmt=None, name="Not Pixel"):
         super().__init__(fmt, datefmt)
-        self.name = name  # Set custom name
+        self.name = name
 
     def format(self, record):
         # Define color styles for log levels
