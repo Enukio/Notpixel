@@ -104,10 +104,6 @@ if not filenames:
 else:
     logger.info(f"Filenames processed: {Fore.GREEN}{filenames}{Style.RESET_ALL}")
 
-# Retrieve the Python version
-python_version = platform.python_version()
-logger.info(f"Using Python interpreter: Python {python_version}")
-
 # Return to main.py using the same interpreter
 logger.info("Returning to Menu...")
 os.system(f'"{sys.executable}" main.py')
