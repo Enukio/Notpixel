@@ -1,49 +1,24 @@
 import os
 import sys
-import platform
 import re
-import logging
-
+from loguru import logger
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-
-from colorama import init, Fore, Style
-
-# Initialize colorama
-init(autoreset=True)
 
 # Constants
 BASE_URL = "https://app.notpx.app"  # Replace with the actual URL
 OUTPUT_FILE = "./px"  # File to save filenames
 
-# Custom logging formatter with colors
-class ColorFormatter(logging.Formatter):
-    def __init__(self, fmt=None, datefmt=None, name="Not Pixel"):
-        super().__init__(fmt, datefmt)
-        self.name = name
-
-    def format(self, record):
-        level_color = {
-            'INFO': Fore.CYAN,
-            'WARNING': Fore.MAGENTA,
-            'ERROR': Fore.YELLOW,
-            'CRITICAL': Fore.RED + Style.BRIGHT,
-        }.get(record.levelname, Fore.WHITE)
-
-        record.levelname = f"{level_color}{record.levelname}{Style.RESET_ALL}"
-        record.botname = f"{Fore.RED}[{self.name}]{Style.RESET_ALL}"
-        record.msg = f"{Style.BRIGHT}{record.msg}{Style.RESET_ALL}"
-        return super().format(record)
-
 # Configure logger
-name = "Not Pixel"
-formatter = ColorFormatter('%(botname)s | %(asctime)s | %(levelname)s | %(message)s', '%Y-%m-%d %H:%M:%S', name)
-handler = logging.StreamHandler()
-handler.setFormatter(formatter)
-logger = logging.getLogger(name)
-logger.setLevel(logging.INFO)
-logger.addHandler(handler)
+logger.remove()
+logger.add(
+    sink=sys.stdout,
+    format="<r>[Not Pixel]</r> | <white>{time:YYYY-MM-DD HH:mm:ss}</white> | "
+           "<level>{level}</level> | <cyan>{line}</cyan> | {message}",
+    colorize=True
+)
+logger = logger.opt(colors=True)
 
 # Function to save filenames to a file
 def storage(filenames, output_file):
@@ -52,18 +27,18 @@ def storage(filenames, output_file):
         with open(output_file, 'w') as f:
             for filename in filenames:
                 f.write(filename + '\n')
-        logger.info(f"Saved {len(filenames)} filenames to {Fore.GREEN}{output_file}{Style.RESET_ALL}.")
+        logger.info(f"Saved {len(filenames)} filenames to <green>{output_file}</green>")
     except Exception as e:
-        logger.error(f"Failed to save filenames to {Fore.RED}{output_file}{Style.RESET_ALL}: {Fore.YELLOW}{e}{Style.RESET_ALL}")
+        logger.error(f"Failed to save filenames to {output_file}: {e}")
 
 # Function to fetch JavaScript filenames from a base URL
 def get_main_js_format(base_url, output_file="./px"):
     if not base_url.startswith(("http://", "https://")):
-        logger.error(f"Invalid URL format: {Fore.RED}{base_url}{Style.RESET_ALL}")
+        logger.error(f"Invalid URL format: {base_url}")
         return None
 
     try:
-        logger.info(f"Fetching base URL: {Fore.GREEN}{base_url}{Style.RESET_ALL}")
+        logger.info(f"Fetching base URL: <green>{base_url}</green>")
         
         session = requests.Session()
         retries = Retry(total=3, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
@@ -97,9 +72,9 @@ if __name__ == "__main__":
     filenames = get_main_js_format(BASE_URL, OUTPUT_FILE)
 
     if not filenames:
-        logger.info(f"{Fore.YELLOW}No filenames were saved.{Style.RESET_ALL}")
+        logger.info("No filenames were saved.")
     else:
-        logger.info(f"Filenames processed: {Fore.GREEN}{filenames}{Style.RESET_ALL}")
+        logger.info(f"Filenames processed: <green>{filenames}</green>")
 
     # Return to main.py
     print("\n🔄 Returning to Menu in 2 seconds...\n")
